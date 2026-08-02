@@ -1,13 +1,18 @@
 import {
+  ChevronDown,
+  ChevronUp,
   FileText,
   Search,
+  Trash2,
 } from 'lucide-react';
 import {
+  Fragment,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import { Link } from 'react-router-dom';
+
 import { useStore } from '../../contexts/StoreContext';
 import { formatMoney } from '../../lib/utils';
 
@@ -53,6 +58,324 @@ const sortCategories = (a, b) =>
     String(b.name || ''),
   );
 
+const formatDateTime = value => {
+  if (!value) return 'Not available';
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString();
+};
+
+const textOrDash = value => {
+  const text = String(value || '').trim();
+  return text || '—';
+};
+
+const getOptionText = item =>
+  Object.entries(
+    item?.selectedOptionLabels || {},
+  )
+    .map(
+      ([label, value]) =>
+        `${label}: ${value}`,
+    )
+    .join(', ');
+
+function DetailCard({ title, children }) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+        {title}
+      </h3>
+      <div className="grid gap-2.5 text-sm">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  important = false,
+  multiline = false,
+}) {
+  return (
+    <div className="grid gap-1 border-b border-slate-100 pb-2.5 last:border-b-0 last:pb-0 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4">
+      <span className="text-xs font-bold text-slate-500">
+        {label}
+      </span>
+      <strong
+        className={[
+          'min-w-0 break-words text-sm',
+          important
+            ? 'rounded-lg bg-amber-50 px-2.5 py-2 font-black text-amber-900 ring-1 ring-amber-200'
+            : 'font-bold text-slate-800',
+          multiline ? 'whitespace-pre-wrap' : '',
+        ].join(' ')}
+      >
+        {textOrDash(value)}
+      </strong>
+    </div>
+  );
+}
+
+function OrderDetails({
+  order,
+  currencySymbol,
+}) {
+  const items = Array.isArray(order.items)
+    ? order.items
+    : [];
+
+  return (
+    <div className="grid gap-5 rounded-3xl bg-slate-50 p-4 sm:p-6">
+      <div className="grid gap-4 xl:grid-cols-3">
+        <DetailCard title="Customer information">
+          <DetailRow
+            label="Full name"
+            value={order.customer?.name}
+          />
+          <DetailRow
+            label="Phone"
+            value={order.customer?.phone}
+          />
+          <DetailRow
+            label="Email"
+            value={order.customer?.email}
+          />
+          <DetailRow
+            label="Full address"
+            value={order.customer?.address}
+            multiline
+          />
+        </DetailCard>
+
+        <DetailCard title="Shipping and payment">
+          <DetailRow
+            label="Shipping area"
+            value={order.shippingAreaName}
+          />
+          <DetailRow
+            label="Shipping area ID"
+            value={order.shippingAreaId}
+          />
+          <DetailRow
+            label="Payment method"
+            value={order.paymentMethodName}
+          />
+          <DetailRow
+            label="Payment method ID"
+            value={order.paymentMethodId}
+          />
+          <DetailRow
+            label="Transaction ID"
+            value={order.transactionId}
+            important={Boolean(
+              String(
+                order.transactionId || '',
+              ).trim(),
+            )}
+          />
+        </DetailCard>
+
+        <DetailCard title="Order totals">
+          <DetailRow
+            label="Subtotal"
+            value={formatMoney(
+              order.subtotal,
+              currencySymbol,
+            )}
+          />
+          <DetailRow
+            label="Shipping fee"
+            value={formatMoney(
+              order.shippingFee,
+              currencySymbol,
+            )}
+          />
+          <DetailRow
+            label="Coupon code"
+            value={order.couponCode}
+          />
+          <DetailRow
+            label="Discount"
+            value={formatMoney(
+              order.discount,
+              currencySymbol,
+            )}
+          />
+          <DetailRow
+            label="Grand total"
+            value={formatMoney(
+              order.total,
+              currencySymbol,
+            )}
+            important
+          />
+        </DetailCard>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <DetailCard title="Order note">
+          <DetailRow
+            label="Customer note"
+            value={order.note}
+            multiline
+            important={Boolean(
+              String(order.note || '').trim(),
+            )}
+          />
+        </DetailCard>
+
+        <DetailCard title="Database and time information">
+          <DetailRow
+            label="Order ID"
+            value={order.id}
+          />
+          <DetailRow
+            label="Order number"
+            value={order.orderNumber}
+          />
+          <DetailRow
+            label="Created"
+            value={formatDateTime(
+              order.createdAt,
+            )}
+          />
+          <DetailRow
+            label="Last updated"
+            value={formatDateTime(
+              order.updatedAt,
+            )}
+          />
+        </DetailCard>
+      </div>
+
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
+          <h3 className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+            Ordered products ({items.length})
+          </h3>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] border-collapse text-left">
+            <thead>
+              <tr className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-3 font-black">
+                  Product
+                </th>
+                <th className="px-4 py-3 font-black">
+                  SKU
+                </th>
+                <th className="px-4 py-3 font-black">
+                  Selected options
+                </th>
+                <th className="px-4 py-3 text-right font-black">
+                  Qty
+                </th>
+                <th className="px-4 py-3 text-right font-black">
+                  Unit price
+                </th>
+                <th className="px-4 py-3 text-right font-black">
+                  Line total
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {items.map((item, index) => (
+                <tr
+                  key={
+                    item.id ||
+                    `${item.productId}-${item.variantId}-${index}`
+                  }
+                  className="border-t border-slate-100"
+                >
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex items-center gap-3">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name || 'Product'}
+                          className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-[10px] font-bold text-slate-400">
+                          No image
+                        </span>
+                      )}
+
+                      <div className="min-w-0">
+                        <strong className="block break-words text-sm font-black text-slate-900">
+                          {textOrDash(item.name)}
+                        </strong>
+                        <small className="mt-1 block break-all text-xs text-slate-500">
+                          Product ID: {textOrDash(item.productId)}
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-3 text-sm font-bold text-slate-700">
+                    {textOrDash(item.sku)}
+                  </td>
+
+                  <td className="max-w-[260px] px-4 py-3 text-sm font-bold text-slate-700">
+                    {textOrDash(
+                      getOptionText(item),
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-black text-slate-900">
+                    {Number(item.quantity || 0)}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-bold text-slate-700">
+                    {formatMoney(
+                      item.unitPrice,
+                      currencySymbol,
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-black text-slate-900">
+                    {formatMoney(
+                      item.lineTotal ??
+                        Number(
+                          item.unitPrice || 0,
+                        ) *
+                          Number(
+                            item.quantity || 0,
+                          ),
+                      currencySymbol,
+                    )}
+                  </td>
+                </tr>
+              ))}
+
+              {!items.length && (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-8 text-center text-sm font-bold text-slate-500"
+                  >
+                    No product information was found for this order.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function Orders() {
   const {
     orders,
@@ -62,6 +385,7 @@ export default function Orders() {
     loadAdmin,
     adminLoaded,
     updateOrder,
+    deleteOrder,
   } = useStore();
 
   const [query, setQuery] =
@@ -70,7 +394,11 @@ export default function Orders() {
     useState('');
   const [categoryId, setCategoryId] =
     useState('');
+  const [expandedOrderId, setExpandedOrderId] =
+    useState('');
   const [updating, setUpdating] =
+    useState('');
+  const [deleting, setDeleting] =
     useState('');
   const [error, setError] =
     useState('');
@@ -79,10 +407,10 @@ export default function Orders() {
     if (!adminLoaded) {
       loadAdmin().catch(() => {});
     }
-  }, [
-    adminLoaded,
-    loadAdmin,
-  ]);
+  }, [adminLoaded, loadAdmin]);
+
+  const currencySymbol =
+    settings?.currencySymbol || '৳';
 
   const rootCategories = useMemo(
     () =>
@@ -141,19 +469,17 @@ export default function Orders() {
 
     return (order.items || []).some(item => {
       const ids = itemCategoryIds(item);
-      const subcategory =
-        categoryById.get(
-          ids.subcategoryId,
-        );
+      const subcategory = categoryById.get(
+        ids.subcategoryId,
+      );
 
       return (
         ids.categoryId ===
           String(selectedCategoryId) ||
         ids.subcategoryId ===
           String(selectedCategoryId) ||
-        String(
-          subcategory?.parentId || '',
-        ) === String(selectedCategoryId)
+        String(subcategory?.parentId || '') ===
+          String(selectedCategoryId)
       );
     });
   };
@@ -179,34 +505,54 @@ export default function Orders() {
     ],
   );
 
-  const rows = useMemo(
-    () =>
-      orders.filter(order => {
-        const text =
-          `${order.orderNumber} ${order.customer?.name} ${order.customer?.phone}`
-            .toLowerCase();
+  const rows = useMemo(() => {
+    const normalizedQuery = query
+      .trim()
+      .toLowerCase();
 
-        return (
-          text.includes(
-            query.toLowerCase(),
-          ) &&
-          (!status ||
-            order.status === status) &&
-          orderMatchesCategory(
-            order,
-            categoryId,
-          )
-        );
-      }),
-    [
-      orders,
-      query,
-      status,
-      categoryId,
-      productById,
-      categoryById,
-    ],
-  );
+    return orders.filter(order => {
+      const searchableText = [
+        order.orderNumber,
+        order.id,
+        order.customer?.name,
+        order.customer?.phone,
+        order.customer?.email,
+        order.customer?.address,
+        order.shippingAreaName,
+        order.paymentMethodName,
+        order.transactionId,
+        order.note,
+        order.couponCode,
+        ...(order.items || []).flatMap(item => [
+          item.name,
+          item.sku,
+          getOptionText(item),
+        ]),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return (
+        searchableText.includes(
+          normalizedQuery,
+        ) &&
+        (!status ||
+          order.status === status) &&
+        orderMatchesCategory(
+          order,
+          categoryId,
+        )
+      );
+    });
+  }, [
+    orders,
+    query,
+    status,
+    categoryId,
+    productById,
+    categoryById,
+  ]);
 
   const change = async (
     order,
@@ -224,9 +570,41 @@ export default function Orders() {
         [key]: value,
       });
     } catch (requestError) {
-      setError(requestError.message);
+      setError(
+        requestError?.message ||
+          'Order could not be updated.',
+      );
     } finally {
       setUpdating('');
+    }
+  };
+
+  const permanentlyDelete = async order => {
+    const confirmed = window.confirm(
+      `Delete order ${order.orderNumber} permanently?\n\nThis will remove the order from the admin list and database. This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(order.id);
+    setError('');
+
+    try {
+      await deleteOrder(order.id);
+
+      if (
+        String(expandedOrderId) ===
+        String(order.id)
+      ) {
+        setExpandedOrderId('');
+      }
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          'Order could not be deleted.',
+      );
+    } finally {
+      setDeleting('');
     }
   };
 
@@ -279,9 +657,9 @@ export default function Orders() {
           </span>
           <h1>Orders</h1>
           <p>
-            Filter orders by product category,
-            search details and update every status
-            immediately.
+            View every checkout detail, payment
+            transaction ID, customer note and
+            ordered product from one place.
           </p>
         </div>
       </div>
@@ -337,35 +715,29 @@ export default function Orders() {
           <input
             value={query}
             onChange={event =>
-              setQuery(
-                event.target.value,
-              )
+              setQuery(event.target.value)
             }
-            placeholder="Order number, name or phone..."
+            placeholder="Search order, customer, transaction ID or note..."
           />
         </label>
 
         <select
           value={status}
           onChange={event =>
-            setStatus(
-              event.target.value,
-            )
+            setStatus(event.target.value)
           }
         >
           <option value="">
             All status
           </option>
-          {ORDER_STATUSES.map(
-            option => (
-              <option
-                key={option}
-                value={option}
-              >
-                {labelFor(option)}
-              </option>
-            ),
-          )}
+          {ORDER_STATUSES.map(option => (
+            <option
+              key={option}
+              value={option}
+            >
+              {labelFor(option)}
+            </option>
+          ))}
         </select>
 
         <span className="admin-result-count">
@@ -402,88 +774,170 @@ export default function Orders() {
                     Shipping
                   </span>
                 </th>
-                <th>Invoice</th>
+                <th>Details</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
             <tbody>
-              {rows.map(
-                (order, index) => (
-                  <tr key={order.id}>
-                    <td>
-                      <span className="order-row-number">
-                        {index + 1}
-                      </span>
-                    </td>
-                    <td>
-                      <strong className="order-number">
-                        {order.orderNumber}
-                      </strong>
-                      <small>
-                        {new Date(
-                          order.createdAt,
-                        ).toLocaleString()}
-                      </small>
-                    </td>
-                    <td>
-                      <strong>
-                        {order.customer?.name}
-                      </strong>
-                      <small>
-                        {order.customer?.phone}
-                      </small>
-                    </td>
-                    <td>
-                      <strong>
-                        {formatMoney(
-                          order.total,
-                          settings?.currencySymbol,
+              {rows.map((order, index) => {
+                const expanded =
+                  String(expandedOrderId) ===
+                  String(order.id);
+
+                return (
+                  <Fragment key={order.id}>
+                    <tr>
+                      <td>
+                        <span className="order-row-number">
+                          {index + 1}
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong className="order-number">
+                          {order.orderNumber}
+                        </strong>
+                        <small>
+                          {formatDateTime(
+                            order.createdAt,
+                          )}
+                        </small>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {textOrDash(
+                            order.customer?.name,
+                          )}
+                        </strong>
+                        <small>
+                          {textOrDash(
+                            order.customer?.phone,
+                          )}
+                        </small>
+                        {order.customer?.email && (
+                          <small className="break-all">
+                            {order.customer.email}
+                          </small>
                         )}
-                      </strong>
-                    </td>
-                    <td>
-                      {statusSelect(
-                        order,
-                        'status',
-                        order.status,
-                        ORDER_STATUSES,
-                      )}
-                    </td>
-                    <td>
-                      {statusSelect(
-                        order,
-                        'paymentStatus',
-                        order.paymentStatus,
-                        PAYMENT_STATUSES,
-                      )}
-                    </td>
-                    <td>
-                      {statusSelect(
-                        order,
-                        'shippingStatus',
-                        order.shippingStatus,
-                        SHIPPING_STATUSES,
-                      )}
-                    </td>
-                    <td>
-                      <Link
-                        className="btn btn-primary btn-small"
-                        to={`/admin/orders/${order.id}/invoice`}
-                      >
-                        <FileText
-                          size={15}
-                        />
-                        Invoice
-                      </Link>
-                    </td>
-                  </tr>
-                ),
-              )}
+                      </td>
+
+                      <td>
+                        <strong>
+                          {formatMoney(
+                            order.total,
+                            currencySymbol,
+                          )}
+                        </strong>
+                        {order.transactionId && (
+                          <small className="max-w-[180px] break-all font-bold text-amber-700">
+                            TxID: {order.transactionId}
+                          </small>
+                        )}
+                      </td>
+
+                      <td>
+                        {statusSelect(
+                          order,
+                          'status',
+                          order.status,
+                          ORDER_STATUSES,
+                        )}
+                      </td>
+
+                      <td>
+                        {statusSelect(
+                          order,
+                          'paymentStatus',
+                          order.paymentStatus,
+                          PAYMENT_STATUSES,
+                        )}
+                      </td>
+
+                      <td>
+                        {statusSelect(
+                          order,
+                          'shippingStatus',
+                          order.shippingStatus,
+                          SHIPPING_STATUSES,
+                        )}
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedOrderId(
+                              expanded
+                                ? ''
+                                : order.id,
+                            )
+                          }
+                          className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-black text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                          aria-expanded={expanded}
+                        >
+                          {expanded ? (
+                            <ChevronUp size={15} />
+                          ) : (
+                            <ChevronDown size={15} />
+                          )}
+                          {expanded ? 'Hide' : 'View'}
+                        </button>
+                      </td>
+
+                      <td>
+                        <div className="flex min-w-max flex-wrap items-center gap-2">
+                          <Link
+                            className="btn btn-primary btn-small"
+                            to={`/admin/orders/${order.id}/invoice`}
+                          >
+                            <FileText size={15} />
+                            Invoice
+                          </Link>
+
+                          <button
+                            type="button"
+                            disabled={
+                              deleting === order.id
+                            }
+                            onClick={() =>
+                              permanentlyDelete(order)
+                            }
+                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-black text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Trash2 size={15} />
+                            {deleting === order.id
+                              ? 'Deleting...'
+                              : 'Delete'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {expanded && (
+                      <tr>
+                        <td
+                          colSpan="9"
+                          className="!p-0"
+                        >
+                          <OrderDetails
+                            order={order}
+                            currencySymbol={
+                              currencySymbol
+                            }
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
 
               {!rows.length && (
                 <tr>
                   <td
-                    colSpan="8"
+                    colSpan="9"
                     className="orders-empty-cell"
                   >
                     No orders found for the selected filters.

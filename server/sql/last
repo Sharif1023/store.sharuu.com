@@ -1,0 +1,344 @@
+USE `sharuu_universal_store`;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `customer_email` VARCHAR(255) NULL AFTER `customer_name`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'customer_email'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `customer_address` TEXT NULL AFTER `customer_email`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'customer_address'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `shipping_area_id` VARCHAR(80) NULL AFTER `customer_address`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'shipping_area_id'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `shipping_area_name` VARCHAR(190) NULL AFTER `shipping_area_id`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'shipping_area_name'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `payment_method_id` VARCHAR(80) NULL AFTER `shipping_area_name`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'payment_method_id'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `payment_method_name` VARCHAR(190) NULL AFTER `payment_method_id`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'payment_method_name'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `transaction_id` VARCHAR(190) NULL AFTER `payment_method_name`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'transaction_id'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `order_note` TEXT NULL AFTER `transaction_id`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'order_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `coupon_code` VARCHAR(100) NULL AFTER `order_note`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'coupon_code'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `subtotal` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `coupon_code`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'subtotal'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `shipping_fee` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `subtotal`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'shipping_fee'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `discount` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `shipping_fee`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'discount'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD COLUMN `items_data` LONGTEXT NULL AFTER `discount`',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `COLUMN_NAME` = 'items_data'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD KEY `idx_orders_transaction_id` (`transaction_id`)',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`STATISTICS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `INDEX_NAME` = 'idx_orders_transaction_id'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `orders` ADD KEY `idx_orders_payment_method` (`payment_method_id`)',
+    'SELECT 1'
+  )
+  FROM `information_schema`.`STATISTICS`
+  WHERE `TABLE_SCHEMA` = DATABASE()
+    AND `TABLE_NAME` = 'orders'
+    AND `INDEX_NAME` = 'idx_orders_payment_method'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+START TRANSACTION;
+
+UPDATE `orders`
+SET
+  `customer_email` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.customer.email')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`customer_email`, '')
+  END,
+  `customer_address` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.customer.address')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`customer_address`, '')
+  END,
+  `shipping_area_id` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.shippingAreaId')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`shipping_area_id`, '')
+  END,
+  `shipping_area_name` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.shippingAreaName')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`shipping_area_name`, '')
+  END,
+  `payment_method_id` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.paymentMethodId')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`payment_method_id`, '')
+  END,
+  `payment_method_name` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.paymentMethodName')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`payment_method_name`, '')
+  END,
+  `transaction_id` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.transactionId')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`transaction_id`, '')
+  END,
+  `order_note` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.note')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`order_note`, '')
+  END,
+  `coupon_code` = CASE
+    WHEN JSON_VALID(`data`) THEN COALESCE(
+      NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.couponCode')), 'null'),
+      ''
+    )
+    ELSE COALESCE(`coupon_code`, '')
+  END,
+  `subtotal` = CASE
+    WHEN JSON_VALID(`data`) THEN CAST(
+      COALESCE(
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.subtotal')), 'null'),
+        '0'
+      ) AS DECIMAL(14,2)
+    )
+    ELSE COALESCE(`subtotal`, 0)
+  END,
+  `shipping_fee` = CASE
+    WHEN JSON_VALID(`data`) THEN CAST(
+      COALESCE(
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.shippingFee')), 'null'),
+        '0'
+      ) AS DECIMAL(14,2)
+    )
+    ELSE COALESCE(`shipping_fee`, 0)
+  END,
+  `discount` = CASE
+    WHEN JSON_VALID(`data`) THEN CAST(
+      COALESCE(
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.discount')), 'null'),
+        '0'
+      ) AS DECIMAL(14,2)
+    )
+    ELSE COALESCE(`discount`, 0)
+  END,
+  `items_data` = CASE
+    WHEN JSON_VALID(`data`) THEN JSON_EXTRACT(`data`, '$.items')
+    ELSE COALESCE(`items_data`, JSON_ARRAY())
+  END;
+
+COMMIT;
+
+SELECT
+  `id`,
+  `order_number`,
+  `customer_name`,
+  `customer_email`,
+  `shipping_area_name`,
+  `payment_method_name`,
+  `transaction_id`,
+  `order_note`,
+  `subtotal`,
+  `shipping_fee`,
+  `discount`,
+  `total`
+FROM `orders`
+ORDER BY `created_at` DESC
+LIMIT 20;
