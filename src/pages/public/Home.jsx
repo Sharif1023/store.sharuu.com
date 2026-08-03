@@ -621,7 +621,7 @@ export default function Home() {
           }
 
           .home-hero-button {
-  min-height: 72px;
+  min-height: 92px;
   margin-top: 36px;
   padding-left: 38px;
   padding-right: 38px;
@@ -631,8 +631,8 @@ export default function Home() {
 }
 
 .home-hero-button svg {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
 }
 
           .home-reveal {
@@ -828,9 +828,7 @@ export default function Home() {
 
       {/* Featured Products */}
       {featured.length > 0 && (
-        <RevealSection className="relative overflow-hidden bg-[#f1eee7] py-12 sm:py-14 lg:py-16">
-          <div className="pointer-events-none absolute -right-44 -top-44 h-[420px] w-[420px] rounded-full border border-slate-900/5" />
-
+<RevealSection className="relative overflow-hidden bg-[#f1eee7] py-12 sm:py-14 lg:py-16">
           <div className="relative mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-6">
             <SectionHeading
               eyebrow="Selected for you"

@@ -1,7 +1,5 @@
 import {
   Check,
-  Minus,
-  Plus,
   ShieldCheck,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -26,80 +24,103 @@ export default function Checkout() {
   const {
     items,
     subtotal,
-    updateQuantity,
     clearCart,
   } = useCart();
 
   const { settings } = useStore();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] =
+    useState(initialForm);
+
   const [couponCode, setCouponCode] =
     useState("");
+
   const [coupon, setCoupon] =
     useState(null);
+
   const [error, setError] =
     useState("");
+
   const [saving, setSaving] =
     useState(false);
 
   const primaryColor =
-    settings?.primaryColor || "#0f172a";
+    settings?.primaryColor ||
+    "#0f172a";
 
   const secondaryColor =
-    settings?.secondaryColor || "#d97706";
+    settings?.secondaryColor ||
+    "#d97706";
 
   const themeStyle = {
-    "--store-primary": primaryColor,
-    "--store-secondary": secondaryColor,
-    "--store-secondary-soft": hexToRgba(
+    "--store-primary":
+      primaryColor,
+
+    "--store-secondary":
       secondaryColor,
-      0.08,
-    ),
-    "--store-secondary-ring": hexToRgba(
-      secondaryColor,
-      0.12,
-    ),
-    "--store-secondary-shadow": hexToRgba(
-      secondaryColor,
-      0.24,
-    ),
+
+    "--store-secondary-soft":
+      hexToRgba(
+        secondaryColor,
+        0.08,
+      ),
+
+    "--store-secondary-ring":
+      hexToRgba(
+        secondaryColor,
+        0.12,
+      ),
+
+    "--store-secondary-shadow":
+      hexToRgba(
+        secondaryColor,
+        0.24,
+      ),
   };
 
-  const shippingAreas = Array.isArray(
-    settings?.shippingAreas,
-  )
-    ? settings.shippingAreas.filter(
-        (item) => item.active,
-      )
-    : [];
+  const shippingAreas =
+    Array.isArray(
+      settings?.shippingAreas,
+    )
+      ? settings.shippingAreas.filter(
+          (item) => item.active,
+        )
+      : [];
 
-  const paymentMethods = Array.isArray(
-    settings?.paymentMethods,
-  )
-    ? settings.paymentMethods.filter(
-        (item) => item.enabled,
-      )
-    : [];
+  const paymentMethods =
+    Array.isArray(
+      settings?.paymentMethods,
+    )
+      ? settings.paymentMethods.filter(
+          (item) => item.enabled,
+        )
+      : [];
 
-  const shippingArea = shippingAreas.find(
-    (item) =>
-      String(item.id) ===
-      String(form.shippingAreaId),
-  );
+  const shippingArea =
+    shippingAreas.find(
+      (item) =>
+        String(item.id) ===
+        String(
+          form.shippingAreaId,
+        ),
+    );
 
   const paymentMethod =
     paymentMethods.find(
       (item) =>
         String(item.id) ===
-        String(form.paymentMethodId),
+        String(
+          form.paymentMethodId,
+        ),
     );
 
   const shippingFee =
     coupon?.freeShipping
       ? 0
       : Number(
-          shippingArea?.charge || 0,
+          shippingArea?.charge ||
+            0,
         );
 
   const discount = Number(
@@ -121,81 +142,110 @@ export default function Checkout() {
     }
 
     if (!form.phone.trim()) {
-      labels.push("Phone number");
+      labels.push(
+        "Phone number",
+      );
     }
 
     if (!form.address.trim()) {
       labels.push("Address");
     }
 
-    if (!form.shippingAreaId) {
-      labels.push("Shipping area");
+    if (
+      !form.shippingAreaId
+    ) {
+      labels.push(
+        "Shipping area",
+      );
     }
 
-    if (!form.paymentMethodId) {
-      labels.push("Payment method");
+    if (
+      !form.paymentMethodId
+    ) {
+      labels.push(
+        "Payment method",
+      );
     }
 
     return labels;
   }, [form]);
 
-  const updateForm = (key, value) => {
+  const updateForm = (
+    key,
+    value,
+  ) => {
     setForm((previous) => ({
       ...previous,
       [key]: value,
     }));
 
     if (
-      key === "paymentMethodId"
+      key ===
+      "paymentMethodId"
     ) {
       setForm((previous) => ({
         ...previous,
-        paymentMethodId: value,
+
+        paymentMethodId:
+          value,
+
         transactionId: "",
       }));
     }
   };
 
-  const applyCoupon = async () => {
-    const code = couponCode.trim();
+  const applyCoupon =
+    async () => {
+      const code =
+        couponCode.trim();
 
-    if (!code) {
-      setCoupon(null);
-      setError(
-        "Please enter a coupon code.",
-      );
-      return;
-    }
+      if (!code) {
+        setCoupon(null);
 
-    try {
-      setError("");
+        setError(
+          "Please enter a coupon code.",
+        );
 
-      const result =
-        await api.validateCoupon({
-          code,
-          subtotal,
-          shippingAreaId:
-            form.shippingAreaId,
-        });
+        return;
+      }
 
-      setCoupon(result);
-    } catch (requestError) {
-      setCoupon(null);
+      try {
+        setError("");
 
-      setError(
-        requestError?.message ||
-          "Coupon could not be applied.",
-      );
-    }
-  };
+        const result =
+          await api.validateCoupon(
+            {
+              code,
+              subtotal,
 
-  const submit = async (event) => {
+              shippingAreaId:
+                form.shippingAreaId,
+            },
+          );
+
+        setCoupon(result);
+      } catch (
+        requestError
+      ) {
+        setCoupon(null);
+
+        setError(
+          requestError?.message ||
+            "Coupon could not be applied.",
+        );
+      }
+    };
+
+  const submit = async (
+    event,
+  ) => {
     event.preventDefault();
 
     if (!items.length) {
       setError(
         "Your cart is empty.",
       );
+
       return;
     }
 
@@ -205,6 +255,7 @@ export default function Checkout() {
           ", ",
         )}.`,
       );
+
       return;
     }
 
@@ -216,6 +267,7 @@ export default function Checkout() {
       setError(
         "Transaction ID is required for this payment method.",
       );
+
       return;
     }
 
@@ -226,9 +278,15 @@ export default function Checkout() {
       const result =
         await api.createOrder({
           customer: {
-            name: form.name.trim(),
-            phone: form.phone.trim(),
-            email: form.email.trim(),
+            name:
+              form.name.trim(),
+
+            phone:
+              form.phone.trim(),
+
+            email:
+              form.email.trim(),
+
             address:
               form.address.trim(),
           },
@@ -242,7 +300,8 @@ export default function Checkout() {
           transactionId:
             form.transactionId.trim(),
 
-          note: form.note.trim(),
+          note:
+            form.note.trim(),
 
           couponCode:
             coupon?.code ||
@@ -252,10 +311,14 @@ export default function Checkout() {
             (item) => ({
               productId:
                 item.productId,
+
               variantId:
-                item.variantId || "",
+                item.variantId ||
+                "",
+
               quantity: Number(
-                item.quantity || 1,
+                item.quantity ||
+                  1,
               ),
             }),
           ),
@@ -265,10 +328,13 @@ export default function Checkout() {
 
       navigate(
         `/order-success/${result.order.id}?token=${encodeURIComponent(
-          result.order.publicToken,
+          result.order
+            .publicToken,
         )}`,
       );
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       setError(
         requestError?.message ||
           "Order could not be placed.",
@@ -317,10 +383,11 @@ export default function Checkout() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
-            Quantity and selected
-            Color, Size, Age or other
-            options can be reviewed
-            here.
+            Review your order
+            total and complete
+            your customer,
+            shipping and payment
+            information.
           </p>
         </header>
 
@@ -333,12 +400,25 @@ export default function Checkout() {
             <CheckoutSection title="Order items">
               <div className="space-y-3">
                 {items.map(
-                  (item, index) => {
+                  (
+                    item,
+                    index,
+                  ) => {
                     const quantity =
                       Number(
                         item.quantity ||
                           1,
                       );
+
+                    const unitPrice =
+                      Number(
+                        item.unitPrice ||
+                          0,
+                      );
+
+                    const itemTotal =
+                      unitPrice *
+                      quantity;
 
                     const itemKey =
                       item.id ||
@@ -348,81 +428,79 @@ export default function Checkout() {
 
                     return (
                       <article
-                        key={itemKey}
-                        className="grid grid-cols-[82px_minmax(0,1fr)] gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-300 sm:grid-cols-[100px_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:p-4"
+                        key={
+                          itemKey
+                        }
+                        className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4"
                       >
                         <img
-                          src={item.image}
+                          src={
+                            item.image
+                          }
                           alt={
                             item.name ||
                             "Product"
                           }
-                          className="h-[105px] w-[82px] rounded-xl object-cover sm:h-[125px] sm:w-[100px] sm:rounded-2xl"
+                          className="h-[88px] w-[72px] rounded-xl object-cover sm:h-[102px] sm:w-[84px] sm:rounded-2xl"
                         />
 
                         <div className="min-w-0">
                           <h3 className="text-sm font-black leading-5 text-[var(--store-primary)] sm:text-base">
-                            {item.name}
+                            {
+                              item.name
+                            }
                           </h3>
 
                           <SelectedOptions
-                            item={item}
+                            item={
+                              item
+                            }
                           />
 
-                          <strong className="mt-4 block text-sm font-black text-[var(--store-primary)]">
+                          <div className="mt-3 text-xs font-medium text-slate-500">
                             {formatMoney(
-                              item.unitPrice,
+                              unitPrice,
+
+                              settings?.currencySymbol,
+                            )}{" "}
+                            ×{" "}
+                            {
+                              quantity
+                            }
+                          </div>
+                        </div>
+
+                        <div className="col-span-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-3 sm:col-span-1 sm:block sm:min-w-[120px] sm:border-0 sm:pt-0 sm:text-right">
+                          <span className="text-xs font-bold text-slate-500 sm:block">
+                            Item total
+                          </span>
+
+                          <strong className="text-sm font-black text-[var(--store-primary)] sm:mt-1 sm:block sm:text-base">
+                            {formatMoney(
+                              itemTotal,
+
                               settings?.currencySymbol,
                             )}
                           </strong>
-                        </div>
-
-                        <div className="col-start-2 flex w-max items-center overflow-hidden rounded-full border border-slate-200 bg-white sm:col-start-auto">
-                          <button
-                            type="button"
-                            disabled={
-                              quantity <= 1
-                            }
-                            onClick={() =>
-                              updateQuantity(
-                                item.id,
-                                quantity -
-                                  1,
-                              )
-                            }
-                            className="grid h-10 w-10 place-items-center text-slate-500 transition hover:bg-[var(--store-primary)] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                            aria-label={`Decrease quantity of ${item.name}`}
-                          >
-                            <Minus
-                              size={14}
-                            />
-                          </button>
-
-                          <b className="min-w-10 text-center text-sm font-black text-[var(--store-primary)]">
-                            {quantity}
-                          </b>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(
-                                item.id,
-                                quantity +
-                                  1,
-                              )
-                            }
-                            className="grid h-10 w-10 place-items-center text-slate-500 transition hover:bg-[var(--store-primary)] hover:text-white"
-                            aria-label={`Increase quantity of ${item.name}`}
-                          >
-                            <Plus
-                              size={14}
-                            />
-                          </button>
                         </div>
                       </article>
                     );
                   },
                 )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-[var(--store-primary)] px-4 py-4 text-white sm:px-5">
+                <span className="text-sm font-bold">
+                  Items subtotal
+                </span>
+
+                <strong className="text-lg font-black">
+                  {formatMoney(
+                    subtotal,
+
+                    settings?.currencySymbol,
+                  )}
+                </strong>
               </div>
             </CheckoutSection>
 
@@ -435,13 +513,17 @@ export default function Checkout() {
                 >
                   <input
                     type="text"
-                    value={form.name}
+                    value={
+                      form.name
+                    }
                     onChange={(
                       event,
                     ) =>
                       updateForm(
                         "name",
-                        event.target
+
+                        event
+                          .target
                           .value,
                       )
                     }
@@ -459,13 +541,17 @@ export default function Checkout() {
                 >
                   <input
                     type="tel"
-                    value={form.phone}
+                    value={
+                      form.phone
+                    }
                     onChange={(
                       event,
                     ) =>
                       updateForm(
                         "phone",
-                        event.target
+
+                        event
+                          .target
                           .value,
                       )
                     }
@@ -480,13 +566,17 @@ export default function Checkout() {
                 <FormField label="Email">
                   <input
                     type="email"
-                    value={form.email}
+                    value={
+                      form.email
+                    }
                     onChange={(
                       event,
                     ) =>
                       updateForm(
                         "email",
-                        event.target
+
+                        event
+                          .target
                           .value,
                       )
                     }
@@ -512,7 +602,9 @@ export default function Checkout() {
                       ) =>
                         updateForm(
                           "address",
-                          event.target
+
+                          event
+                            .target
                             .value,
                         )
                       }
@@ -555,12 +647,18 @@ export default function Checkout() {
 
                       return (
                         <label
-                          key={area.id}
+                          key={
+                            area.id
+                          }
                           className={[
                             "relative flex min-w-0 cursor-pointer flex-col",
+
                             "items-center justify-center rounded-xl border",
+
                             "px-1.5 py-3 text-center transition duration-200",
+
                             "sm:rounded-2xl sm:px-4 sm:py-4",
+
                             selected
                               ? "border-[var(--store-secondary)] bg-[var(--store-secondary-soft)] shadow-[0_12px_35px_var(--store-secondary-ring)]"
                               : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
@@ -580,20 +678,25 @@ export default function Checkout() {
                             onChange={() =>
                               updateForm(
                                 "shippingAreaId",
+
                                 area.id,
                               )
                             }
                             className="sr-only"
                           />
 
-                          {/* Rectangular selection */}
                           <span
                             className={[
                               "mb-3 inline-flex min-h-8 w-full",
+
                               "items-center justify-center gap-1.5",
+
                               "rounded-md border px-2",
+
                               "text-[10px] font-black uppercase",
+
                               "tracking-[0.12em] transition duration-200",
+
                               selected
                                 ? "border-[var(--store-secondary)] bg-[var(--store-secondary)] text-white"
                                 : "border-slate-200 bg-slate-50 text-slate-500",
@@ -602,7 +705,9 @@ export default function Checkout() {
                             )}
                           >
                             <Check
-                              size={13}
+                              size={
+                                13
+                              }
                               strokeWidth={
                                 3
                               }
@@ -619,7 +724,9 @@ export default function Checkout() {
                           </span>
 
                           <strong className="w-full break-words text-[10px] font-black leading-tight text-[var(--store-primary)] sm:text-sm">
-                            {area.name}
+                            {
+                              area.name
+                            }
                           </strong>
 
                           {area.estimate && (
@@ -638,6 +745,7 @@ export default function Checkout() {
                               ? "Free"
                               : formatMoney(
                                   area.charge,
+
                                   settings?.currencySymbol,
                                 )}
                           </b>
@@ -648,8 +756,9 @@ export default function Checkout() {
                 </div>
               ) : (
                 <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                  No shipping area is
-                  currently available.
+                  No shipping area
+                  is currently
+                  available.
                 </p>
               )}
             </CheckoutSection>
@@ -684,12 +793,18 @@ export default function Checkout() {
 
                       return (
                         <label
-                          key={method.id}
+                          key={
+                            method.id
+                          }
                           className={[
                             "relative flex min-w-0 cursor-pointer flex-col",
+
                             "items-center justify-center rounded-xl border",
+
                             "px-1.5 py-4 text-center transition duration-200",
+
                             "sm:rounded-2xl sm:px-4 sm:py-5",
+
                             selected
                               ? "border-[var(--store-secondary)] bg-[var(--store-secondary-soft)] shadow-[0_12px_35px_var(--store-secondary-ring)]"
                               : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
@@ -709,20 +824,25 @@ export default function Checkout() {
                             onChange={() =>
                               updateForm(
                                 "paymentMethodId",
+
                                 method.id,
                               )
                             }
                             className="sr-only"
                           />
 
-                          {/* Rectangular selection */}
                           <span
                             className={[
                               "mb-3 inline-flex min-h-8 w-full",
+
                               "items-center justify-center gap-1.5",
+
                               "rounded-md border px-2",
+
                               "text-[10px] font-black uppercase",
+
                               "tracking-[0.12em] transition duration-200",
+
                               selected
                                 ? "border-[var(--store-secondary)] bg-[var(--store-secondary)] text-white"
                                 : "border-slate-200 bg-slate-50 text-slate-500",
@@ -731,7 +851,9 @@ export default function Checkout() {
                             )}
                           >
                             <Check
-                              size={13}
+                              size={
+                                13
+                              }
                               strokeWidth={
                                 3
                               }
@@ -767,8 +889,9 @@ export default function Checkout() {
                 </div>
               ) : (
                 <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                  No payment method is
-                  currently available.
+                  No payment method
+                  is currently
+                  available.
                 </p>
               )}
 
@@ -801,7 +924,9 @@ export default function Checkout() {
                       ) =>
                         updateForm(
                           "transactionId",
-                          event.target
+
+                          event
+                            .target
                             .value,
                         )
                       }
@@ -822,10 +947,14 @@ export default function Checkout() {
                 <textarea
                   rows={4}
                   value={form.note}
-                  onChange={(event) =>
+                  onChange={(
+                    event,
+                  ) =>
                     updateForm(
                       "note",
-                      event.target.value,
+
+                      event.target
+                        .value,
                     )
                   }
                   placeholder="Write any special instruction for your order"
@@ -846,6 +975,7 @@ export default function Checkout() {
                 label="Subtotal"
                 value={formatMoney(
                   subtotal,
+
                   settings?.currencySymbol,
                 )}
               />
@@ -856,6 +986,7 @@ export default function Checkout() {
                   form.shippingAreaId
                     ? formatMoney(
                         shippingFee,
+
                         settings?.currencySymbol,
                       )
                     : "Select area"
@@ -873,6 +1004,7 @@ export default function Checkout() {
                     -
                     {formatMoney(
                       discount,
+
                       settings?.currencySymbol,
                     )}
                   </strong>
@@ -884,8 +1016,12 @@ export default function Checkout() {
             <div className="mt-5 flex overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition focus-within:border-[var(--store-secondary)] focus-within:bg-white focus-within:ring-4 focus-within:ring-[var(--store-secondary-ring)]">
               <input
                 type="text"
-                value={couponCode}
-                onChange={(event) =>
+                value={
+                  couponCode
+                }
+                onChange={(
+                  event,
+                ) =>
                   setCouponCode(
                     event.target.value.toUpperCase(),
                   )
@@ -896,7 +1032,9 @@ export default function Checkout() {
 
               <button
                 type="button"
-                onClick={applyCoupon}
+                onClick={
+                  applyCoupon
+                }
                 className="shrink-0 bg-[var(--store-secondary)] px-5 text-xs font-black text-white transition hover:brightness-110"
               >
                 Apply
@@ -912,6 +1050,7 @@ export default function Checkout() {
               <strong className="text-xl font-black">
                 {formatMoney(
                   total,
+
                   settings?.currencySymbol,
                 )}
               </strong>
@@ -943,9 +1082,10 @@ export default function Checkout() {
               />
 
               <span>
-                Required fields must
-                be completed before
-                order placement.
+                Required fields
+                must be completed
+                before order
+                placement.
               </span>
             </p>
           </aside>
@@ -957,31 +1097,44 @@ export default function Checkout() {
 
 const inputClassName = [
   "w-full rounded-2xl border border-slate-200",
+
   "bg-slate-50 px-4 py-3.5 text-sm",
+
   "text-slate-900 outline-none transition",
+
   "placeholder:text-slate-400",
+
   "focus:border-[var(--store-secondary)] focus:bg-white",
+
   "focus:ring-4 focus:ring-[var(--store-secondary-ring)]",
 ].join(" ");
 
-function SelectedOptions({ item }) {
+function SelectedOptions({
+  item,
+}) {
   const options =
-    item.selectedOptionLabels || {};
+    item.selectedOptionLabels ||
+    {};
 
   if (
     !options ||
-    typeof options !== "object"
+    typeof options !==
+      "object"
   ) {
     return null;
   }
 
   const entries =
-    Object.entries(options).filter(
+    Object.entries(
+      options,
+    ).filter(
       ([label, value]) =>
         label &&
         value !== undefined &&
         value !== null &&
-        String(value).trim() !== "",
+        String(
+          value,
+        ).trim() !== "",
     );
 
   if (!entries.length) {
@@ -1007,41 +1160,51 @@ function SelectedOptions({ item }) {
   );
 }
 
-
-function FormattedNote({ text }) {
-  const parts = String(text || "").split(
+function FormattedNote({
+  text,
+}) {
+  const parts = String(
+    text || "",
+  ).split(
     /(\*\*[\s\S]+?\*\*)/g,
   );
 
   return (
     <p className="m-0 whitespace-pre-wrap break-words text-xs font-medium leading-6 text-slate-600 sm:text-sm sm:leading-7">
-      {parts.map((part, index) => {
-        const isBold =
-          part.startsWith("**") &&
-          part.endsWith("**");
+      {parts.map(
+        (part, index) => {
+          const isBold =
+            part.startsWith(
+              "**",
+            ) &&
+            part.endsWith(
+              "**",
+            );
 
-        if (isBold) {
+          if (isBold) {
+            return (
+              <strong
+                key={index}
+                className="font-black text-[var(--store-primary)]"
+              >
+                {part.slice(
+                  2,
+                  -2,
+                )}
+              </strong>
+            );
+          }
+
           return (
-            <strong
-              key={index}
-              className="font-black text-[var(--store-primary)]"
-            >
-              {part.slice(2, -2)}
-            </strong>
+            <span key={index}>
+              {part}
+            </span>
           );
-        }
-
-        return (
-          <span key={index}>
-            {part}
-          </span>
-        );
-      })}
+        },
+      )}
     </p>
   );
 }
-
-
 
 function CheckoutSection({
   title,
@@ -1049,9 +1212,10 @@ function CheckoutSection({
   required = false,
   children,
 }) {
-  const headingNote = String(
-    note || "",
-  ).trim();
+  const headingNote =
+    String(
+      note || "",
+    ).trim();
 
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-6 lg:p-7">
@@ -1075,7 +1239,9 @@ function CheckoutSection({
 
               <div className="relative">
                 <FormattedNote
-                  text={headingNote}
+                  text={
+                    headingNote
+                  }
                 />
               </div>
             </div>
@@ -1157,16 +1323,22 @@ function hexToRgba(
     return `rgba(217, 119, 6, ${alpha})`;
   }
 
-  const number = Number.parseInt(
-    normalized,
-    16,
-  );
+  const number =
+    Number.parseInt(
+      normalized,
+      16,
+    );
 
   const red =
-    (number >> 16) & 255;
+    (number >> 16) &
+    255;
+
   const green =
-    (number >> 8) & 255;
-  const blue = number & 255;
+    (number >> 8) &
+    255;
+
+  const blue =
+    number & 255;
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
