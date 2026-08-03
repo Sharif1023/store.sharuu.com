@@ -71,7 +71,9 @@ function normalizeSocialLinks(value) {
 function getSocialHref(item) {
   const platform =
     item.platform.toLowerCase();
-  const value = item.url.trim();
+
+  const value =
+    item.url.trim();
 
   if (
     /^(https?:\/\/|mailto:|tel:)/i.test(
@@ -81,14 +83,20 @@ function getSocialHref(item) {
     return value;
   }
 
-  if (platform.includes('whatsapp')) {
+  if (
+    platform.includes(
+      'whatsapp',
+    )
+  ) {
     return `https://wa.me/${value.replace(
       /\D/g,
       '',
     )}`;
   }
 
-  if (platform.includes('email')) {
+  if (
+    platform.includes('email')
+  ) {
     return `mailto:${value}`;
   }
 
@@ -109,43 +117,162 @@ function SocialIcon({
   platform,
   size,
 }) {
-  const name = platform.toLowerCase();
+  const name =
+    platform.toLowerCase();
 
-  if (name.includes('facebook')) {
-    return <Facebook size={size} />;
+  if (
+    name.includes('facebook')
+  ) {
+    return (
+      <Facebook size={size} />
+    );
   }
 
-  if (name.includes('instagram')) {
-    return <Instagram size={size} />;
+  if (
+    name.includes('instagram')
+  ) {
+    return (
+      <Instagram size={size} />
+    );
   }
 
   if (
     name.includes('whatsapp') ||
     name.includes('messenger')
   ) {
-    return <MessageCircle size={size} />;
+    return (
+      <MessageCircle
+        size={size}
+      />
+    );
   }
 
-  if (name.includes('youtube')) {
-    return <Youtube size={size} />;
+  if (
+    name.includes('youtube')
+  ) {
+    return (
+      <Youtube size={size} />
+    );
   }
 
-  if (name.includes('linkedin')) {
-    return <Linkedin size={size} />;
+  if (
+    name.includes('linkedin')
+  ) {
+    return (
+      <Linkedin size={size} />
+    );
   }
 
   if (
     name.includes('twitter') ||
     name === 'x'
   ) {
-    return <Twitter size={size} />;
+    return (
+      <Twitter size={size} />
+    );
   }
 
-  if (name.includes('telegram')) {
+  if (
+    name.includes('telegram')
+  ) {
     return <Send size={size} />;
   }
 
-  return <Globe2 size={size} />;
+  return (
+    <Globe2 size={size} />
+  );
+}
+
+function getSocialBrandTheme(
+  platform,
+) {
+  const name = String(
+    platform || '',
+  ).toLowerCase();
+
+  if (
+    name.includes('facebook')
+  ) {
+    return {
+      color: '#1877F2',
+      soft: '#EAF2FF',
+    };
+  }
+
+  if (
+    name.includes('instagram')
+  ) {
+    return {
+      color: '#E4405F',
+      soft: '#FFF0F3',
+    };
+  }
+
+  if (
+    name.includes('whatsapp')
+  ) {
+    return {
+      color: '#25D366',
+      soft: '#EAFBF0',
+    };
+  }
+
+  if (
+    name.includes('messenger')
+  ) {
+    return {
+      color: '#0084FF',
+      soft: '#EAF5FF',
+    };
+  }
+
+  if (
+    name.includes('youtube')
+  ) {
+    return {
+      color: '#FF0000',
+      soft: '#FFF0F0',
+    };
+  }
+
+  if (
+    name.includes('linkedin')
+  ) {
+    return {
+      color: '#0A66C2',
+      soft: '#EAF4FF',
+    };
+  }
+
+  if (
+    name.includes('twitter')
+  ) {
+    return {
+      color: '#1D9BF0',
+      soft: '#EAF7FF',
+    };
+  }
+
+  if (name === 'x') {
+    return {
+      color: '#111827',
+      soft: '#F1F5F9',
+    };
+  }
+
+  if (
+    name.includes('telegram')
+  ) {
+    return {
+      color: '#229ED9',
+      soft: '#EAF8FE',
+    };
+  }
+
+  return {
+    color: '#64748B',
+    soft: '#F1F5F9',
+  };
 }
 
 function SocialLinks({
@@ -153,22 +280,54 @@ function SocialLinks({
   linkClassName,
   iconSize,
 }) {
-  return items.map((item) => (
-    <a
-      key={item.id}
-      href={getSocialHref(item)}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={item.platform}
-      title={item.platform}
-      className={linkClassName}
-    >
-      <SocialIcon
-        platform={item.platform}
-        size={iconSize}
-      />
-    </a>
-  ));
+  return items.map((item) => {
+    const brandTheme =
+      getSocialBrandTheme(
+        item.platform,
+      );
+
+    return (
+      <a
+        key={item.id}
+        href={getSocialHref(
+          item,
+        )}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={
+          item.platform
+        }
+        title={item.platform}
+        style={{
+          '--social-brand':
+            brandTheme.color,
+
+          '--social-soft':
+            brandTheme.soft,
+        }}
+        className={[
+          linkClassName,
+
+          'border-[var(--social-brand)]',
+
+          'bg-[var(--social-soft)]',
+
+          'text-[var(--social-brand)]',
+
+          'hover:bg-[var(--social-brand)]',
+
+          'hover:text-white',
+        ].join(' ')}
+      >
+        <SocialIcon
+          platform={
+            item.platform
+          }
+          size={iconSize}
+        />
+      </a>
+    );
+  });
 }
 
 export default function PublicLayout() {
@@ -179,12 +338,17 @@ export default function PublicLayout() {
   } = useStore();
 
   const { count } = useCart();
-  const location = useLocation();
 
-  const footerRef = useRef(null);
+  const location =
+    useLocation();
 
-  const [menuOpen, setMenuOpen] =
-    useState(false);
+  const footerRef =
+    useRef(null);
+
+  const [
+    menuOpen,
+    setMenuOpen,
+  ] = useState(false);
 
   const [
     openMobileCategory,
@@ -205,7 +369,8 @@ export default function PublicLayout() {
     location.pathname === '/';
 
   const allProductsIsActive =
-    location.pathname === '/shop' &&
+    location.pathname ===
+      '/shop' &&
     !activeCategoryId;
 
   /*
@@ -224,71 +389,80 @@ export default function PublicLayout() {
       '#d97706',
     );
 
-  const themeVariables = useMemo(
-    () =>
-      createThemeVariables(
+  const themeVariables =
+    useMemo(
+      () =>
+        createThemeVariables(
+          primaryColor,
+          secondaryColor,
+        ),
+      [
         primaryColor,
         secondaryColor,
-      ),
-    [
-      primaryColor,
-      secondaryColor,
-    ],
-  );
+      ],
+    );
 
-  const topCategories = useMemo(
-    () =>
-      categories
-        .filter(
-          item =>
-            !item.parentId &&
-            item.active &&
-            item.showInMenu !== false,
-        )
-        .sort(
-          (a, b) =>
-            Number(
-              a.sortOrder || 0,
-            ) -
-            Number(
-              b.sortOrder || 0,
-            ),
+  const topCategories =
+    useMemo(
+      () =>
+        categories
+          .filter(
+            (item) =>
+              !item.parentId &&
+              item.active &&
+              item.showInMenu !==
+                false,
+          )
+          .sort(
+            (a, b) =>
+              Number(
+                a.sortOrder || 0,
+              ) -
+              Number(
+                b.sortOrder || 0,
+              ),
+          ),
+      [categories],
+    );
+
+  const publishedPages =
+    useMemo(
+      () =>
+        pages
+          .filter(
+            (page) =>
+              page.status ===
+              'published',
+          )
+          .slice(0, 6),
+      [pages],
+    );
+
+  const socialLinks =
+    useMemo(
+      () =>
+        normalizeSocialLinks(
+          settings?.socialLinks,
         ),
-    [categories],
-  );
-
-  const publishedPages = useMemo(
-    () =>
-      pages
-        .filter(
-          page =>
-            page.status ===
-            'published',
-        )
-        .slice(0, 6),
-    [pages],
-  );
-
-  const socialLinks = useMemo(
-    () =>
-      normalizeSocialLinks(
+      [
         settings?.socialLinks,
-      ),
-    [settings?.socialLinks],
-  );
+      ],
+    );
 
   const currentYear =
     new Date().getFullYear();
 
   const getSubcategories =
-    parentId =>
+    (parentId) =>
       categories
         .filter(
-          item =>
+          (item) =>
             String(
               item.parentId,
             ) ===
-              String(parentId) &&
+              String(
+                parentId,
+              ) &&
             item.active,
         )
         .sort(
@@ -301,15 +475,19 @@ export default function PublicLayout() {
             ),
         );
 
-  const closeMobileMenu = () => {
-    setMenuOpen(false);
-    setOpenMobileCategory(null);
-  };
+  const closeMobileMenu =
+    () => {
+      setMenuOpen(false);
+
+      setOpenMobileCategory(
+        null,
+      );
+    };
 
   const toggleMobileCategory =
-    categoryId => {
+    (categoryId) => {
       setOpenMobileCategory(
-        current =>
+        (current) =>
           String(current) ===
           String(categoryId)
             ? null
@@ -319,7 +497,10 @@ export default function PublicLayout() {
 
   useEffect(() => {
     setMenuOpen(false);
-    setOpenMobileCategory(null);
+
+    setOpenMobileCategory(
+      null,
+    );
   }, [
     location.pathname,
     location.search,
@@ -344,7 +525,8 @@ export default function PublicLayout() {
     const html =
       document.documentElement;
 
-    const body = document.body;
+    const body =
+      document.body;
 
     const previous = {
       htmlMargin:
@@ -367,11 +549,19 @@ export default function PublicLayout() {
     };
 
     html.style.margin = '0';
-    html.style.padding = '0';
 
-    body.style.margin = '0';
-    body.style.padding = '0';
-    body.style.minHeight = '100%';
+    html.style.padding =
+      '0';
+
+    body.style.margin =
+      '0';
+
+    body.style.padding =
+      '0';
+
+    body.style.minHeight =
+      '100%';
+
     body.style.overflowX =
       'hidden';
 
@@ -414,8 +604,9 @@ export default function PublicLayout() {
 
     const observer =
       new IntersectionObserver(
-        entries => {
-          const [entry] = entries;
+        (entries) => {
+          const [entry] =
+            entries;
 
           setFooterVisible(
             entry.isIntersecting,
@@ -438,20 +629,23 @@ export default function PublicLayout() {
     };
   }, []);
 
-  const mobileBottomLinkClass = ({
-    isActive,
-  }) =>
-    [
-      'relative flex flex-col items-center',
-      'justify-center gap-1 rounded-2xl',
-      'px-2 py-1.5 text-[10px]',
-      'font-semibold',
-      'transition duration-200',
+  const mobileBottomLinkClass =
+    ({ isActive }) =>
+      [
+        'relative flex flex-col items-center',
 
-      isActive
-        ? 'bg-[var(--secondary-color)] text-[var(--on-secondary)]'
-        : 'text-[var(--on-primary-dark)] hover:bg-[var(--footer-surface)]',
-    ].join(' ');
+        'justify-center gap-1 rounded-2xl',
+
+        'px-2 py-1.5 text-[10px]',
+
+        'font-semibold',
+
+        'transition duration-200',
+
+        isActive
+          ? 'bg-[var(--secondary-color)] text-[var(--on-secondary)]'
+          : 'text-[var(--on-primary-dark)] hover:bg-[var(--footer-surface)]',
+      ].join(' ');
 
   return (
     <div
@@ -463,11 +657,25 @@ export default function PublicLayout() {
         <div
           className="announcement-ticker bg-[var(--primary-dark)] py-2.5 text-xs font-semibold tracking-wide text-[var(--on-primary-dark)]"
           role="status"
-          aria-label={settings.announcement}
+          aria-label={
+            settings.announcement
+          }
         >
-          <div className="announcement-ticker-track" aria-hidden="true">
-            <span>{settings.announcement}</span>
-            <span>{settings.announcement}</span>
+          <div
+            className="announcement-ticker-track"
+            aria-hidden="true"
+          >
+            <span>
+              {
+                settings.announcement
+              }
+            </span>
+
+            <span>
+              {
+                settings.announcement
+              }
+            </span>
           </div>
         </div>
       )}
@@ -495,7 +703,9 @@ export default function PublicLayout() {
           >
             {settings?.logo ? (
               <img
-                src={settings.logo}
+                src={
+                  settings.logo
+                }
                 alt={
                   settings?.storeName ||
                   'Sharuu Universal Store'
@@ -516,7 +726,9 @@ export default function PublicLayout() {
 
               {settings?.slogan && (
                 <small className="hidden max-w-[190px] truncate text-[11px] text-slate-500 xl:block">
-                  {settings.slogan}
+                  {
+                    settings.slogan
+                  }
                 </small>
               )}
             </span>
@@ -525,69 +737,93 @@ export default function PublicLayout() {
           {/* Desktop Categories */}
           <nav className="hidden min-w-0 flex-wrap items-center justify-center gap-1 lg:flex">
             {/* Home Button */}
-<Link
-  to="/"
-  className={[
-    'relative inline-flex min-h-10',
-    'shrink-0 items-center gap-1.5',
-    'rounded-xl border',
-    'px-3 py-2',
-    'text-[11px] font-extrabold',
-    'transition duration-200',
-    'xl:gap-2 xl:px-4 xl:text-xs',
+            <Link
+              to="/"
+              className={[
+                'relative inline-flex min-h-10',
 
-    homeIsActive
-      ? [
-          'border-[var(--primary-color)]',
-          'bg-white',
-          'text-[var(--primary-ink)]',
-          'shadow-sm',
-        ].join(' ')
-      : [
-          'border-slate-200',
-          'bg-white',
-          'text-slate-600',
-          'hover:border-[var(--primary-border)]',
-          'hover:bg-[var(--primary-soft)]',
-          'hover:text-[var(--on-primary-soft)]',
-        ].join(' '),
-  ].join(' ')}
->
-  <Home
-    size={16}
-    className="shrink-0 text-current"
-  />
+                'shrink-0 items-center gap-1.5',
 
-  <span className="text-current">
-    Home
-  </span>
+                'rounded-xl border',
 
-  {/* Active underline */}
-  <span
-    className={[
-      'absolute bottom-0',
-      'left-3 right-3 h-0.5',
-      'origin-center rounded-full',
-      'bg-[var(--primary-color)]',
-      'transition-transform duration-200',
+                'px-3 py-2',
 
-      homeIsActive
-        ? 'scale-x-100'
-        : 'scale-x-0',
-    ].join(' ')}
-  />
-</Link>
+                'text-[11px] font-extrabold',
+
+                'transition duration-200',
+
+                'xl:gap-2 xl:px-4 xl:text-xs',
+
+                homeIsActive
+                  ? [
+                      'border-[var(--primary-color)]',
+
+                      'bg-white',
+
+                      'text-[var(--primary-ink)]',
+
+                      'shadow-sm',
+                    ].join(' ')
+                  : [
+                      'border-slate-200',
+
+                      'bg-white',
+
+                      'text-slate-600',
+
+                      'hover:border-[var(--primary-border)]',
+
+                      'hover:bg-[var(--primary-soft)]',
+
+                      'hover:text-[var(--on-primary-soft)]',
+                    ].join(' '),
+              ].join(' ')}
+            >
+              <Home
+                size={16}
+                className="shrink-0 text-current"
+              />
+
+              <span className="text-current">
+                Home
+              </span>
+
+              {/* Active underline */}
+              <span
+                className={[
+                  'absolute bottom-0',
+
+                  'left-3 right-3 h-0.5',
+
+                  'origin-center rounded-full',
+
+                  'bg-[var(--primary-color)]',
+
+                  'transition-transform duration-200',
+
+                  homeIsActive
+                    ? 'scale-x-100'
+                    : 'scale-x-0',
+                ].join(' ')}
+              />
+            </Link>
 
             {/* All Products Button */}
             <Link
               to="/shop"
               className={[
                 'mr-1 inline-flex min-h-10',
+
                 'shrink-0 items-center gap-1.5',
+
                 'rounded-xl border',
+
                 'px-3 py-2',
+
                 'text-[11px] font-black',
+
                 'transition duration-200',
+
                 'xl:gap-2 xl:px-4 xl:text-xs',
 
                 allProductsIsActive
@@ -607,7 +843,7 @@ export default function PublicLayout() {
 
             {/* Main Categories */}
             {topCategories.map(
-              category => {
+              (category) => {
                 const subcategories =
                   getSubcategories(
                     category.id,
@@ -621,7 +857,7 @@ export default function PublicLayout() {
                       category.id,
                     ) ||
                   subcategories.some(
-                    child =>
+                    (child) =>
                       String(
                         child.id,
                       ) ===
@@ -632,7 +868,9 @@ export default function PublicLayout() {
 
                 return (
                   <div
-                    key={category.id}
+                    key={
+                      category.id
+                    }
                     className="group relative"
                   >
                     {/* Category Link */}
@@ -640,13 +878,21 @@ export default function PublicLayout() {
                       to={`/shop?category=${category.id}`}
                       className={[
                         'relative flex min-h-10',
+
                         'shrink-0 items-center',
+
                         'gap-1 rounded-xl',
+
                         'px-2.5 py-2',
+
                         'text-[11px]',
+
                         'font-extrabold',
+
                         'transition duration-200',
+
                         'xl:gap-1.5',
+
                         'xl:px-3 xl:text-xs',
 
                         categoryIsActive
@@ -671,9 +917,13 @@ export default function PublicLayout() {
                       <span
                         className={[
                           'absolute bottom-0',
+
                           'left-3 right-3 h-0.5',
+
                           'origin-center rounded-full',
+
                           'bg-[var(--secondary-color)]',
+
                           'transition-transform duration-200',
 
                           categoryIsActive
@@ -712,14 +962,18 @@ export default function PublicLayout() {
                             </span>
 
                             <ArrowRight
-                              size={16}
+                              size={
+                                16
+                              }
                               className="shrink-0"
                             />
                           </Link>
 
                           <div className="mt-1 max-h-80 space-y-1 overflow-y-auto">
                             {subcategories.map(
-                              child => {
+                              (
+                                child,
+                              ) => {
                                 const childIsActive =
                                   String(
                                     activeCategoryId,
@@ -736,10 +990,15 @@ export default function PublicLayout() {
                                     to={`/shop?category=${child.id}`}
                                     className={[
                                       'flex items-center',
+
                                       'justify-between gap-2',
+
                                       'rounded-xl px-3',
+
                                       'py-3 text-sm',
+
                                       'font-bold transition',
+
                                       'duration-200',
 
                                       childIsActive
@@ -756,7 +1015,9 @@ export default function PublicLayout() {
                                     </span>
 
                                     <ChevronRight
-                                      size={15}
+                                      size={
+                                        15
+                                      }
                                       className="shrink-0"
                                     />
                                   </Link>
@@ -822,12 +1083,17 @@ export default function PublicLayout() {
       >
         <button
           type="button"
-          onClick={closeMobileMenu}
+          onClick={
+            closeMobileMenu
+          }
           aria-label="Close menu"
           className={[
             'absolute inset-0',
+
             'bg-slate-950/60',
+
             'backdrop-blur-sm',
+
             'transition-opacity duration-300',
 
             menuOpen
@@ -839,8 +1105,11 @@ export default function PublicLayout() {
         <aside
           className={[
             'absolute inset-y-0 left-0',
+
             'flex w-[min(90vw,390px)]',
+
             'flex-col bg-white shadow-2xl',
+
             'transition-transform duration-300',
 
             menuOpen
@@ -916,8 +1185,11 @@ export default function PublicLayout() {
                 }) =>
                   [
                     'flex items-center gap-3',
+
                     'rounded-xl px-3 py-3',
+
                     'text-sm font-extrabold',
+
                     'transition',
 
                     isActive
@@ -926,7 +1198,10 @@ export default function PublicLayout() {
                   ].join(' ')
                 }
               >
-                <Home size={18} />
+                <Home
+                  size={18}
+                />
+
                 Home
               </NavLink>
 
@@ -940,8 +1215,11 @@ export default function PublicLayout() {
                 }) =>
                   [
                     'flex items-center gap-3',
+
                     'rounded-xl px-3 py-3',
+
                     'text-sm font-extrabold',
+
                     'transition',
 
                     isActive &&
@@ -951,7 +1229,10 @@ export default function PublicLayout() {
                   ].join(' ')
                 }
               >
-                <Store size={18} />
+                <Store
+                  size={18}
+                />
+
                 All Products
               </NavLink>
             </div>
@@ -963,7 +1244,7 @@ export default function PublicLayout() {
             {/* Mobile Categories */}
             <div className="divide-y divide-slate-100">
               {topCategories.map(
-                category => {
+                (category) => {
                   const subcategories =
                     getSubcategories(
                       category.id,
@@ -1011,8 +1292,11 @@ export default function PublicLayout() {
                             }
                             className={[
                               'grid h-10 w-10',
+
                               'place-items-center',
+
                               'rounded-xl',
+
                               'transition',
 
                               isOpen
@@ -1023,9 +1307,12 @@ export default function PublicLayout() {
                             )}
                           >
                             <ChevronDown
-                              size={18}
+                              size={
+                                18
+                              }
                               className={[
                                 'transition-transform',
+
                                 'duration-200',
 
                                 isOpen
@@ -1044,8 +1331,11 @@ export default function PublicLayout() {
                         <div
                           className={[
                             'grid overflow-hidden',
+
                             'transition-all',
+
                             'duration-300',
+
                             'ease-in-out',
 
                             isOpen
@@ -1071,7 +1361,9 @@ export default function PublicLayout() {
                               </Link>
 
                               {subcategories.map(
-                                child => (
+                                (
+                                  child,
+                                ) => (
                                   <Link
                                     key={
                                       child.id
@@ -1104,11 +1396,13 @@ export default function PublicLayout() {
                 Follow us
               </p>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <SocialLinks
-                  items={socialLinks}
+                  items={
+                    socialLinks
+                  }
                   iconSize={19}
-                  linkClassName="grid h-11 w-11 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-[var(--secondary-color)] hover:bg-[var(--secondary-color)] hover:text-[var(--on-secondary)]"
+                  linkClassName="grid h-11 w-11 place-items-center rounded-xl border transition duration-300 hover:-translate-y-1 hover:shadow-lg"
                 />
               </div>
             </div>
@@ -1183,9 +1477,11 @@ export default function PublicLayout() {
 
               <div className="flex flex-wrap gap-2">
                 <SocialLinks
-                  items={socialLinks}
+                  items={
+                    socialLinks
+                  }
                   iconSize={17}
-                  linkClassName="grid h-9 w-9 place-items-center rounded-xl border border-[var(--footer-border)] bg-[var(--footer-surface)] text-[var(--footer-text)] transition hover:-translate-y-1 hover:border-[var(--secondary-color)] hover:bg-[var(--secondary-color)] hover:text-[var(--on-secondary)] sm:h-11 sm:w-11"
+                  linkClassName="grid h-9 w-9 place-items-center rounded-xl border transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:h-11 sm:w-11"
                 />
               </div>
             </div>
@@ -1204,7 +1500,7 @@ export default function PublicLayout() {
 
               {topCategories
                 .slice(0, 6)
-                .map(item => (
+                .map((item) => (
                   <FooterLink
                     key={item.id}
                     to={`/shop?category=${item.id}`}
@@ -1232,7 +1528,7 @@ export default function PublicLayout() {
               </FooterLink>
 
               {publishedPages.map(
-                page => (
+                (page) => (
                   <FooterLink
                     key={page.id}
                     to={`/page/${page.slug}`}
@@ -1315,7 +1611,9 @@ export default function PublicLayout() {
                         Store address
                       </small>
 
-                      {settings.address}
+                      {
+                        settings.address
+                      }
                     </span>
                   </div>
                 )}
@@ -1345,13 +1643,21 @@ export default function PublicLayout() {
       <nav
         className={[
           'fixed bottom-2 left-2 right-2',
+
           'z-50 grid grid-cols-5',
+
           'rounded-3xl border',
+
           'border-[var(--footer-border)]',
+
           'bg-[var(--primary-dark)]',
+
           'p-2 text-[var(--on-primary-dark)] shadow-2xl',
+
           'backdrop-blur-xl',
+
           'transition-all duration-300',
+
           'lg:hidden',
 
           footerVisible
@@ -1500,7 +1806,8 @@ function normalizeHexColor(
   fallback = '#0f172a',
 ) {
   if (
-    typeof color !== 'string' ||
+    typeof color !==
+      'string' ||
     !color.trim()
   ) {
     return fallback;
@@ -1514,8 +1821,9 @@ function normalizeHexColor(
     hex = hex
       .split('')
       .map(
-        character =>
-          character + character,
+        (character) =>
+          character +
+          character,
       )
       .join('');
   }
@@ -1567,7 +1875,7 @@ function rgbToHex({
   blue,
 }) {
   const channelToHex =
-    channel =>
+    (channel) =>
       Math.round(
         Math.min(
           255,
@@ -1584,7 +1892,9 @@ function rgbToHex({
     red,
   )}${channelToHex(
     green,
-  )}${channelToHex(blue)}`;
+  )}${channelToHex(
+    blue,
+  )}`;
 }
 
 function mixHexColors(
@@ -1598,13 +1908,14 @@ function mixHexColors(
   const second =
     hexToRgb(secondColor);
 
-  const ratio = Math.min(
-    1,
-    Math.max(
-      0,
-      Number(amount) || 0,
-    ),
-  );
+  const ratio =
+    Math.min(
+      1,
+      Math.max(
+        0,
+        Number(amount) || 0,
+      ),
+    );
 
   return rgbToHex({
     red:
@@ -1630,7 +1941,8 @@ function mixHexColors(
 function channelLuminance(
   channel,
 ) {
-  const value = channel / 255;
+  const value =
+    channel / 255;
 
   return value <= 0.03928
     ? value / 12.92
@@ -1650,13 +1962,17 @@ function relativeLuminance(
 
   return (
     0.2126 *
-      channelLuminance(red) +
+      channelLuminance(
+        red,
+      ) +
     0.7152 *
       channelLuminance(
         green,
       ) +
     0.0722 *
-      channelLuminance(blue)
+      channelLuminance(
+        blue,
+      )
   );
 }
 
@@ -1674,15 +1990,17 @@ function contrastRatio(
       secondColor,
     );
 
-  const lighter = Math.max(
-    firstLuminance,
-    secondLuminance,
-  );
+  const lighter =
+    Math.max(
+      firstLuminance,
+      secondLuminance,
+    );
 
-  const darker = Math.min(
-    firstLuminance,
-    secondLuminance,
-  );
+  const darker =
+    Math.min(
+      firstLuminance,
+      secondLuminance,
+    );
 
   return (
     (lighter + 0.05) /
@@ -1693,8 +2011,11 @@ function contrastRatio(
 function getBestTextColor(
   backgroundColor,
 ) {
-  const darkText = '#0f172a';
-  const lightText = '#ffffff';
+  const darkText =
+    '#0f172a';
+
+  const lightText =
+    '#ffffff';
 
   return contrastRatio(
     darkText,
@@ -1734,8 +2055,11 @@ function ensureReadableColor(
     return foreground;
   }
 
-  const darkTarget = '#0f172a';
-  const lightTarget = '#ffffff';
+  const darkTarget =
+    '#0f172a';
+
+  const lightTarget =
+    '#ffffff';
 
   const adjustmentTarget =
     contrastRatio(
@@ -1833,7 +2157,9 @@ function createThemeVariables(
     );
 
   const onPrimary =
-    getBestTextColor(primary);
+    getBestTextColor(
+      primary,
+    );
 
   const onSecondary =
     getBestTextColor(
