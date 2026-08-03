@@ -279,6 +279,7 @@ function SocialLinks({
   items,
   linkClassName,
   iconSize,
+  variant = 'soft',
 }) {
   return items.map((item) => {
     const brandTheme =
@@ -286,17 +287,16 @@ function SocialLinks({
         item.platform,
       );
 
+    const isFooter =
+      variant === 'footer';
+
     return (
       <a
         key={item.id}
-        href={getSocialHref(
-          item,
-        )}
+        href={getSocialHref(item)}
         target="_blank"
         rel="noreferrer"
-        aria-label={
-          item.platform
-        }
+        aria-label={item.platform}
         title={item.platform}
         style={{
           '--social-brand':
@@ -308,21 +308,28 @@ function SocialLinks({
         className={[
           linkClassName,
 
-          'border-[var(--social-brand)]',
-
-          'bg-[var(--social-soft)]',
-
-          'text-[var(--social-brand)]',
-
-          'hover:bg-[var(--social-brand)]',
-
-          'hover:text-white',
+          isFooter
+            ? [
+                'border-transparent',
+                'bg-[var(--social-brand)]',
+                'text-white',
+                'shadow-[0_10px_25px_rgba(0,0,0,0.28)]',
+                'ring-1 ring-white/20',
+                'hover:brightness-110',
+                'hover:ring-white/40',
+                'hover:shadow-[0_15px_35px_rgba(0,0,0,0.38)]',
+              ].join(' ')
+            : [
+                'border-[var(--social-brand)]',
+                'bg-[var(--social-soft)]',
+                'text-[var(--social-brand)]',
+                'hover:bg-[var(--social-brand)]',
+                'hover:text-white',
+              ].join(' '),
         ].join(' ')}
       >
         <SocialIcon
-          platform={
-            item.platform
-          }
+          platform={item.platform}
           size={iconSize}
         />
       </a>
@@ -650,7 +657,7 @@ export default function PublicLayout() {
   return (
     <div
       style={themeVariables}
-      className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-white text-slate-900"
+      className="flex min-h-[100dvh] flex-col overflow-x-clip bg-white text-slate-900"
     >
       {/* Announcement */}
       {settings?.announcement && (
@@ -681,7 +688,7 @@ export default function PublicLayout() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
+<header className="sticky top-0 z-[999] w-full border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto grid min-h-[72px] w-full max-w-[1440px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 lg:min-h-[88px] lg:gap-3 xl:gap-5">
           {/* Mobile Menu */}
           <button
@@ -1477,12 +1484,11 @@ export default function PublicLayout() {
 
               <div className="flex flex-wrap gap-2">
                 <SocialLinks
-                  items={
-                    socialLinks
-                  }
-                  iconSize={17}
-                  linkClassName="grid h-9 w-9 place-items-center rounded-xl border transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:h-11 sm:w-11"
-                />
+  items={socialLinks}
+  iconSize={19}
+  variant="footer"
+  linkClassName="grid h-10 w-10 place-items-center rounded-xl border transition duration-300 hover:-translate-y-1 hover:scale-105 sm:h-11 sm:w-11"
+/>
               </div>
             </div>
 

@@ -722,7 +722,7 @@ export default function Home() {
           <div className="home-hero-content relative z-10 mx-auto w-full max-w-[1180px] px-5 py-20 sm:px-8 sm:py-20 lg:px-6 lg:py-24">
             <div className="max-w-[760px]">
               <span className="home-hero-item home-hero-eyebrow inline-block border-l-2 border-[var(--store-secondary)] pl-4 text-[11px] font-black uppercase tracking-[0.28em] text-[var(--store-secondary)]">
-                Universal Commerce
+                Sharuu Store
               </span>
 
               <h1 className="home-hero-item home-hero-title mt-6 max-w-[800px] font-serif text-5xl font-semibold leading-[0.96] tracking-[-0.045em] text-white sm:text-6xl lg:text-[78px]">
