@@ -258,7 +258,13 @@ export default function Checkout() {
 
       return;
     }
+if (!isValidBangladeshPhone(form.phone)) {
+  setError(
+    "Please enter a valid phone number, for example: 01712345678.",
+  );
 
+  return;
+}
     if (
       paymentMethod
         ?.requiresTransactionId &&
@@ -281,8 +287,9 @@ export default function Checkout() {
             name:
               form.name.trim(),
 
-            phone:
-              form.phone.trim(),
+           phone: normalizeBangladeshPhone(
+  form.phone,
+),
 
             email:
               form.email.trim(),
@@ -536,32 +543,31 @@ export default function Checkout() {
                 </FormField>
 
                 <FormField
-                  label="Phone Number"
-                  required
-                >
-                  <input
-                    type="tel"
-                    value={
-                      form.phone
-                    }
-                    onChange={(
-                      event,
-                    ) =>
-                      updateForm(
-                        "phone",
+  label="Phone Number"
+  required
+>
+  <input
+    type="tel"
+    inputMode="numeric"
+    value={form.phone}
+    onChange={(event) => {
+      const value =
+        event.target.value
+          .replace(/[^\d+]/g, "")
+          .slice(0, 14);
 
-                        event
-                          .target
-                          .value,
-                      )
-                    }
-                    required
-                    autoComplete="tel"
-                    className={
-                      inputClassName
-                    }
-                  />
-                </FormField>
+      updateForm(
+        "phone",
+        value,
+      );
+    }}
+    required
+    autoComplete="tel"
+    placeholder="01712345678"
+    maxLength={14}
+    className={inputClassName}
+  />
+</FormField>
 
                 <FormField label="Email">
                   <input
@@ -1341,4 +1347,35 @@ function hexToRgba(
     number & 255;
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+
+function normalizeBangladeshPhone(
+  phone,
+) {
+  const cleaned = String(
+    phone || "",
+  ).replace(/\D/g, "");
+
+  if (
+    cleaned.startsWith("8801") &&
+    cleaned.length === 13
+  ) {
+    return `0${cleaned.slice(3)}`;
+  }
+
+  return cleaned;
+}
+
+function isValidBangladeshPhone(
+  phone,
+) {
+  const normalized =
+    normalizeBangladeshPhone(
+      phone,
+    );
+
+  return /^01[3-9]\d{8}$/.test(
+    normalized,
+  );
 }
