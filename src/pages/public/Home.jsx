@@ -15,6 +15,37 @@ export default function Home() {
     loading,
   } = useStore();
 
+  /*
+   * Mobile screen-এ 1440px desktop Hero layout-টি
+   * proportionally ছোট করে দেখানো হবে।
+   */
+  const [heroMobileScale, setHeroMobileScale] = useState(() => {
+    if (typeof window === "undefined") {
+      return 1;
+    }
+
+    return window.innerWidth <= 640 ? window.innerWidth / 1440 : 1;
+  });
+
+  useEffect(() => {
+    const updateHeroScale = () => {
+      const viewportWidth = window.innerWidth;
+      const desktopHeroWidth = 1440;
+
+      setHeroMobileScale(
+        viewportWidth <= 640 ? viewportWidth / desktopHeroWidth : 1,
+      );
+    };
+
+    updateHeroScale();
+
+    window.addEventListener("resize", updateHeroScale);
+
+    return () => {
+      window.removeEventListener("resize", updateHeroScale);
+    };
+  }, []);
+
   const primaryColor = getSafeColor(
     settings?.primaryColor,
     DEFAULT_PRIMARY_COLOR,
@@ -35,7 +66,9 @@ export default function Home() {
     .filter((item) => !item.parentId && item.active)
     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
-  const featured = publicProducts.filter((item) => item.featured).slice(0, 8);
+  const featured = publicProducts
+    .filter((item) => item.featured)
+    .slice(0, 8);
 
   const modelImages = (settings?.newArrivalModels || []).filter(
     (item) => item.active !== false,
@@ -58,6 +91,7 @@ export default function Home() {
               borderTopColor: secondaryColor,
             }}
           />
+
           Loading store...
         </div>
       </div>
@@ -110,20 +144,35 @@ export default function Home() {
           animation: homePageEnter 800ms cubic-bezier(.16, 1, .3, 1) both;
         }
 
-        /* Hero image আগে আসবে */
+        /* Hero outer frame */
+        .home-hero-frame {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+          background: #020617;
+        }
+
+        /* Hero image */
         .home-hero-image {
           opacity: 0;
           transform: scale(1.07);
-          animation: homeHeroImageEnter 1800ms cubic-bezier(.16, 1, .3, 1)
-            80ms forwards;
+          animation:
+            homeHeroImageEnter
+            1800ms
+            cubic-bezier(.16, 1, .3, 1)
+            80ms
+            forwards;
           will-change: opacity, transform;
         }
 
-        /* Hero text একটার পর একটা আসবে */
+        /* Hero text animation */
         .home-hero-item {
           opacity: 0;
           transform: translateY(36px) scale(0.985);
-          animation: homeHeroContentEnter 1150ms cubic-bezier(.16, 1, .3, 1)
+          animation:
+            homeHeroContentEnter
+            1150ms
+            cubic-bezier(.16, 1, .3, 1)
             forwards;
           will-change: opacity, transform;
         }
@@ -144,7 +193,7 @@ export default function Home() {
           animation-delay: 1120ms;
         }
 
-        /* সম্পূর্ণ section ধীরে উঠবে */
+        /* Section reveal */
         .home-reveal {
           opacity: 0;
           transform: translateY(50px) scale(0.985);
@@ -192,7 +241,7 @@ export default function Home() {
           transform: translateY(0);
         }
 
-        /* Category card আগে, image তারপর text */
+        /* Category card */
         .home-category-card {
           opacity: 0;
           transform: translateY(42px) scale(0.97);
@@ -319,7 +368,9 @@ export default function Home() {
           transition-delay: calc(var(--item-delay, 0ms) + 1020ms);
         }
 
-        .home-reveal.is-visible .home-product-sequence :is(h1, h2, h3, h4),
+        .home-reveal.is-visible
+          .home-product-sequence
+          :is(h1, h2, h3, h4),
         .home-reveal.is-visible .home-product-sequence p,
         .home-reveal.is-visible .home-product-sequence span,
         .home-reveal.is-visible .home-product-sequence button {
@@ -327,7 +378,7 @@ export default function Home() {
           transform: translateY(0) scale(1);
         }
 
-        /* Branding banner image আগে আসবে */
+        /* Branding banner */
         .home-banner-card {
           opacity: 0;
           transform: translateY(46px) scale(0.975);
@@ -396,7 +447,7 @@ export default function Home() {
           transform: translateY(0);
         }
 
-        /* New arrival image তারপর লেখা */
+        /* New arrival */
         .home-arrival-card {
           opacity: 0;
           transform: translateY(46px) scale(0.975);
@@ -510,7 +561,45 @@ export default function Home() {
           }
         }
 
+        /*
+         * Mobile-এ desktop Hero-কে নতুনভাবে rearrange করা হচ্ছে না।
+         * 1440x680 desktop Hero canvas-টি শুধু proportionally scale হচ্ছে।
+         */
         @media (max-width: 640px) {
+          .home-hero-frame {
+            height: calc(680px * var(--hero-mobile-scale));
+            min-height: 0;
+          }
+
+          .home-hero-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1440px;
+            height: 680px;
+            min-height: 680px !important;
+            transform: scale(var(--hero-mobile-scale));
+            transform-origin: top left;
+          }
+
+          /*
+           * Tailwind responsive classes viewport-এর উপর কাজ করে।
+           * তাই mobile viewport-এ desktop typography force করা হয়েছে।
+           */
+          .home-hero-content {
+            width: 100%;
+            max-width: 1180px;
+            padding: 96px 24px;
+          }
+
+          .home-hero-title {
+            font-size: 78px;
+          }
+
+          .home-hero-subtitle {
+            font-size: 18px;
+          }
+
           .home-hero-image {
             animation-duration: 1450ms;
           }
@@ -532,8 +621,19 @@ export default function Home() {
           }
 
           .home-hero-button {
-            animation-delay: 840ms;
-          }
+  min-height: 72px;
+  margin-top: 36px;
+  padding-left: 38px;
+  padding-right: 38px;
+  font-size: 18px;
+  gap: 12px;
+  animation-delay: 840ms;
+}
+
+.home-hero-button svg {
+  width: 22px;
+  height: 22px;
+}
 
           .home-reveal {
             transition-duration: 950ms, 1050ms;
@@ -593,54 +693,61 @@ export default function Home() {
       `}</style>
 
       {/* Hero */}
-      <section className="relative isolate flex min-h-[580px] items-center overflow-hidden bg-slate-950 text-white sm:min-h-[620px] lg:min-h-[680px]">
-        <div
-          className="home-hero-image absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `
-              linear-gradient(
-                90deg,
-                rgba(2, 6, 23, 0.92) 0%,
-                rgba(2, 6, 23, 0.74) 45%,
-                rgba(2, 6, 23, 0.12) 100%
-              ),
-              url("${settings?.heroImage || ""}")
-            `,
-          }}
-        />
+      <div
+        className="home-hero-frame"
+        style={{
+          "--hero-mobile-scale": heroMobileScale,
+        }}
+      >
+        <section className="home-hero-section relative isolate flex min-h-[580px] items-center overflow-hidden bg-slate-950 text-white sm:min-h-[620px] lg:min-h-[680px]">
+          <div
+            className="home-hero-image absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `
+                linear-gradient(
+                  90deg,
+                  rgba(2, 6, 23, 0.92) 0%,
+                  rgba(2, 6, 23, 0.74) 45%,
+                  rgba(2, 6, 23, 0.12) 100%
+                ),
+                url("${settings?.heroImage || ""}")
+              `,
+            }}
+          />
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
 
-        <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-tl-[160px] border-l border-t border-white/10 bg-white/[0.03]" />
+          <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-tl-[160px] border-l border-t border-white/10 bg-white/[0.03]" />
 
-        <div className="relative z-10 mx-auto w-full max-w-[1180px] px-5 py-20 sm:px-8 sm:py-20 lg:px-6 lg:py-24">
-          <div className="max-w-[760px]">
-            <span className="home-hero-item home-hero-eyebrow inline-block border-l-2 border-[var(--store-secondary)] pl-4 text-[11px] font-black uppercase tracking-[0.28em] text-[var(--store-secondary)]">
-              Universal Commerce
-            </span>
+          <div className="home-hero-content relative z-10 mx-auto w-full max-w-[1180px] px-5 py-20 sm:px-8 sm:py-20 lg:px-6 lg:py-24">
+            <div className="max-w-[760px]">
+              <span className="home-hero-item home-hero-eyebrow inline-block border-l-2 border-[var(--store-secondary)] pl-4 text-[11px] font-black uppercase tracking-[0.28em] text-[var(--store-secondary)]">
+                Universal Commerce
+              </span>
 
-            <h1 className="home-hero-item home-hero-title mt-6 max-w-[800px] font-serif text-5xl font-semibold leading-[0.96] tracking-[-0.045em] text-white sm:text-6xl lg:text-[78px]">
-              {settings?.heroTitle || "Discover your next favorite"}
-            </h1>
+              <h1 className="home-hero-item home-hero-title mt-6 max-w-[800px] font-serif text-5xl font-semibold leading-[0.96] tracking-[-0.045em] text-white sm:text-6xl lg:text-[78px]">
+                {settings?.heroTitle || "Discover your next favorite"}
+              </h1>
 
-            <p className="home-hero-item home-hero-subtitle mt-6 max-w-[620px] text-base leading-8 text-slate-200 sm:text-lg">
-              {settings?.heroSubtitle}
-            </p>
+              <p className="home-hero-item home-hero-subtitle mt-6 max-w-[620px] text-base leading-8 text-slate-200 sm:text-lg">
+                {settings?.heroSubtitle}
+              </p>
 
-            <Link
-              to="/shop"
-              className="home-hero-item home-hero-button home-secondary-button group mt-8 inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-7 text-sm font-black text-white transition duration-500 hover:-translate-y-1"
-            >
-              {settings?.heroButtonText || "Shop Now"}
+              <Link
+                to="/shop"
+                className="home-hero-item home-hero-button home-secondary-button group mt-8 inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-7 text-sm font-black text-white transition duration-500 hover:-translate-y-1"
+              >
+                {settings?.heroButtonText || "Shop Now"}
 
-              <ArrowRight
-                size={18}
-                className="transition-transform duration-500 group-hover:translate-x-1"
-              />
-            </Link>
+                <ArrowRight
+                  size={18}
+                  className="transition-transform duration-500 group-hover:translate-x-1"
+                />
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Categories */}
       {roots.length > 0 && (
@@ -748,191 +855,167 @@ export default function Home() {
         </RevealSection>
       )}
 
-     {/* Branding Banners */}
-{brandingBanners.length > 0 && (
-  <RevealSection
-    className={[
-      'mx-auto grid w-full max-w-[1180px]',
-      'grid-cols-2 gap-3',
-      'px-4 py-10',
-      'sm:gap-4 sm:px-8 sm:py-14',
-      'lg:grid-cols-2 lg:px-6 lg:py-16',
-    ].join(' ')}
-  >
-    {brandingBanners.map(
-      (banner, index) => (
-        <Link
-          key={banner.id || index}
-          to={banner.link || '/shop'}
-          style={{
-            '--item-delay': `${
-              (index % 2) * 180
-            }ms`,
-          }}
+      {/* Branding Banners */}
+      {brandingBanners.length > 0 && (
+        <RevealSection
           className={[
-            'home-banner-card group relative',
-            'isolate flex min-w-0 items-end',
-            'overflow-hidden bg-slate-950',
-
-            /*
-             * Mobile-এ দুইটি card পাশাপাশি থাকবে,
-             * তাই height, radius ও shadow ছোট রাখা হয়েছে।
-             */
-            'min-h-[260px] rounded-[22px]',
-            'shadow-[0_16px_40px_rgba(15,23,42,0.14)]',
-
-            'sm:min-h-[360px] sm:rounded-[26px]',
-            'sm:shadow-[0_20px_55px_rgba(15,23,42,0.15)]',
-
-            index === 0 &&
-            brandingBanners.length > 1
-              ? 'lg:min-h-[500px]'
-              : 'lg:min-h-[450px]',
-
-            'lg:rounded-[30px]',
-            'lg:shadow-[0_24px_65px_rgba(15,23,42,0.15)]',
-          ].join(' ')}
+            "mx-auto grid w-full max-w-[1180px]",
+            "grid-cols-2 gap-3",
+            "px-4 py-10",
+            "sm:gap-4 sm:px-8 sm:py-14",
+            "lg:grid-cols-2 lg:px-6 lg:py-16",
+          ].join(" ")}
         >
-          {/* Banner Background */}
-          <div
-            className="home-banner-image absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-            style={{
-              backgroundImage: `
-                linear-gradient(
-                  90deg,
-                  rgba(2, 6, 23, 0.88),
-                  rgba(2, 6, 23, 0.16)
-                ),
-                url("${banner.image}")
-              `,
-            }}
-          />
-
-          {/* Bottom Gradient */}
-          <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
-
-          {/* Inner Border */}
-          <span
-            className={[
-              'pointer-events-none absolute',
-              'inset-2 rounded-[16px]',
-              'border border-white/20',
-              'sm:inset-3 sm:rounded-[20px]',
-              'lg:rounded-[22px]',
-            ].join(' ')}
-          />
-
-          {/* Banner Content */}
-          <div
-            className={[
-              'relative z-10 min-w-0',
-              'w-full p-4',
-              'sm:p-6',
-              'lg:max-w-xl lg:p-9',
-            ].join(' ')}
-          >
-            {/* Kicker */}
-            <span
+          {brandingBanners.map((banner, index) => (
+            <Link
+              key={banner.id || index}
+              to={banner.link || "/shop"}
+              style={{
+                "--item-delay": `${(index % 2) * 180}ms`,
+              }}
               className={[
-                'home-banner-kicker',
-                'block truncate',
-                'text-[7px] font-black',
-                'uppercase tracking-[0.14em]',
-                'text-white/75',
-                'sm:text-[9px]',
-                'sm:tracking-[0.2em]',
-                'lg:text-[10px]',
-                'lg:tracking-[0.24em]',
-              ].join(' ')}
+                "home-banner-card group relative",
+                "isolate flex min-w-0 items-end",
+                "overflow-hidden bg-slate-950",
+                "min-h-[260px] rounded-[22px]",
+                "shadow-[0_16px_40px_rgba(15,23,42,0.14)]",
+                "sm:min-h-[360px] sm:rounded-[26px]",
+                "sm:shadow-[0_20px_55px_rgba(15,23,42,0.15)]",
+                index === 0 && brandingBanners.length > 1
+                  ? "lg:min-h-[500px]"
+                  : "lg:min-h-[450px]",
+                "lg:rounded-[30px]",
+                "lg:shadow-[0_24px_65px_rgba(15,23,42,0.15)]",
+              ].join(" ")}
             >
-              Exclusive edit
-            </span>
-
-            {/* Title */}
-            <h2
-              className={[
-                'home-banner-title',
-                'mt-2 break-words font-serif',
-                'text-xl font-semibold',
-                'leading-[1.05] text-white',
-                'sm:mt-3 sm:text-3xl',
-                'lg:mt-4 lg:text-5xl',
-              ].join(' ')}
-            >
-              {banner.title}
-            </h2>
-
-            {/* Subtitle */}
-            {banner.subtitle && (
-              <p
-                className={[
-                  'home-banner-subtitle',
-                  'mt-2 overflow-hidden',
-                  'text-[10px] leading-4',
-                  'text-slate-200',
-                  'sm:mt-3 sm:text-xs',
-                  'sm:leading-5',
-                  'lg:mt-4 lg:max-w-lg',
-                  'lg:text-sm lg:leading-7',
-                ].join(' ')}
+              {/* Banner Background */}
+              <div
+                className="home-banner-image absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 style={{
-                  display:
-                    '-webkit-box',
-
-                  WebkitBoxOrient:
-                    'vertical',
-
-                  WebkitLineClamp: 3,
+                  backgroundImage: `
+                    linear-gradient(
+                      90deg,
+                      rgba(2, 6, 23, 0.88),
+                      rgba(2, 6, 23, 0.16)
+                    ),
+                    url("${banner.image}")
+                  `,
                 }}
-              >
-                {banner.subtitle}
-              </p>
-            )}
-
-            {/* Button */}
-            <span
-              className={[
-                'home-banner-button',
-                'mt-4 inline-flex',
-                'max-w-full items-center',
-                'gap-1.5 rounded-full',
-                'bg-white px-3 py-2',
-                'text-[9px] font-black',
-                'text-slate-950',
-                'shadow-sm transition',
-                'duration-300',
-                'group-hover:bg-[var(--secondary-color)]',
-                'group-hover:text-[var(--on-secondary)]',
-
-                'sm:mt-5 sm:gap-2',
-                'sm:px-4 sm:py-2.5',
-                'sm:text-[11px]',
-
-                'lg:mt-6 lg:px-5',
-                'lg:py-3 lg:text-xs',
-              ].join(' ')}
-            >
-              <span className="truncate">
-                {banner.buttonText ||
-                  'Explore'}
-              </span>
-
-              <ArrowRight
-                size={15}
-                className={[
-                  'shrink-0',
-                  'transition-transform',
-                  'duration-500',
-                  'group-hover:translate-x-1',
-                ].join(' ')}
               />
-            </span>
-          </div>
-        </Link>
-      ),
-    )}
-  </RevealSection>
-)}
+
+              {/* Bottom Gradient */}
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+
+              {/* Inner Border */}
+              <span
+                className={[
+                  "pointer-events-none absolute",
+                  "inset-2 rounded-[16px]",
+                  "border border-white/20",
+                  "sm:inset-3 sm:rounded-[20px]",
+                  "lg:rounded-[22px]",
+                ].join(" ")}
+              />
+
+              {/* Banner Content */}
+              <div
+                className={[
+                  "relative z-10 min-w-0",
+                  "w-full p-4",
+                  "sm:p-6",
+                  "lg:max-w-xl lg:p-9",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "home-banner-kicker",
+                    "block truncate",
+                    "text-[7px] font-black",
+                    "uppercase tracking-[0.14em]",
+                    "text-white/75",
+                    "sm:text-[9px]",
+                    "sm:tracking-[0.2em]",
+                    "lg:text-[10px]",
+                    "lg:tracking-[0.24em]",
+                  ].join(" ")}
+                >
+                  Exclusive edit
+                </span>
+
+                <h2
+                  className={[
+                    "home-banner-title",
+                    "mt-2 break-words font-serif",
+                    "text-xl font-semibold",
+                    "leading-[1.05] text-white",
+                    "sm:mt-3 sm:text-3xl",
+                    "lg:mt-4 lg:text-5xl",
+                  ].join(" ")}
+                >
+                  {banner.title}
+                </h2>
+
+                {banner.subtitle && (
+                  <p
+                    className={[
+                      "home-banner-subtitle",
+                      "mt-2 overflow-hidden",
+                      "text-[10px] leading-4",
+                      "text-slate-200",
+                      "sm:mt-3 sm:text-xs",
+                      "sm:leading-5",
+                      "lg:mt-4 lg:max-w-lg",
+                      "lg:text-sm lg:leading-7",
+                    ].join(" ")}
+                    style={{
+                      display: "-webkit-box",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 3,
+                    }}
+                  >
+                    {banner.subtitle}
+                  </p>
+                )}
+
+                <span
+                  className={[
+                    "home-banner-button",
+                    "mt-4 inline-flex",
+                    "max-w-full items-center",
+                    "gap-1.5 rounded-full",
+                    "bg-white px-3 py-2",
+                    "text-[9px] font-black",
+                    "text-slate-950",
+                    "shadow-sm transition",
+                    "duration-300",
+                    "group-hover:bg-[var(--secondary-color)]",
+                    "group-hover:text-[var(--on-secondary)]",
+                    "sm:mt-5 sm:gap-2",
+                    "sm:px-4 sm:py-2.5",
+                    "sm:text-[11px]",
+                    "lg:mt-6 lg:px-5",
+                    "lg:py-3 lg:text-xs",
+                  ].join(" ")}
+                >
+                  <span className="truncate">
+                    {banner.buttonText || "Explore"}
+                  </span>
+
+                  <ArrowRight
+                    size={15}
+                    className={[
+                      "shrink-0",
+                      "transition-transform",
+                      "duration-500",
+                      "group-hover:translate-x-1",
+                    ].join(" ")}
+                  />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </RevealSection>
+      )}
 
       {/* New Arrivals */}
       {modelImages.length > 0 && (
@@ -977,7 +1060,9 @@ export default function Home() {
                   <img
                     src={item.image}
                     alt={
-                      item.alt || item.title || `New arrival model ${index + 1}`
+                      item.alt ||
+                      item.title ||
+                      `New arrival model ${index + 1}`
                     }
                     loading="lazy"
                     className="home-arrival-image absolute inset-0 h-full w-full object-cover"
@@ -1058,9 +1143,11 @@ function RevealSection({ children, className = "", delay = 0, style }) {
   return (
     <section
       ref={sectionRef}
-      className={["home-reveal", visible ? "is-visible" : "", className].join(
-        " ",
-      )}
+      className={[
+        "home-reveal",
+        visible ? "is-visible" : "",
+        className,
+      ].join(" ")}
       style={{
         ...style,
         transitionDelay: `${delay}ms`,
@@ -1118,12 +1205,13 @@ function getSafeColor(value, fallback) {
 }
 
 function hexToRgba(hex, alpha = 1) {
-  const normalized = getSafeColor(hex, DEFAULT_SECONDARY_COLOR).replace(
-    "#",
-    "",
-  );
+  const normalized = getSafeColor(
+    hex,
+    DEFAULT_SECONDARY_COLOR,
+  ).replace("#", "");
 
   const number = Number.parseInt(normalized, 16);
+
   const red = (number >> 16) & 255;
   const green = (number >> 8) & 255;
   const blue = number & 255;

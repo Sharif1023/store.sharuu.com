@@ -788,7 +788,7 @@ export default function Checkout() {
                 ?.requiresTransactionId && (
                 <div className="mt-4">
                   <FormField
-                    label="Transaction ID"
+                    label="Transaction ID/Reference/Last 4 digits"
                     required
                   >
                     <input
@@ -1007,6 +1007,42 @@ function SelectedOptions({ item }) {
   );
 }
 
+
+function FormattedNote({ text }) {
+  const parts = String(text || "").split(
+    /(\*\*[\s\S]+?\*\*)/g,
+  );
+
+  return (
+    <p className="m-0 whitespace-pre-wrap break-words text-xs font-medium leading-6 text-slate-600 sm:text-sm sm:leading-7">
+      {parts.map((part, index) => {
+        const isBold =
+          part.startsWith("**") &&
+          part.endsWith("**");
+
+        if (isBold) {
+          return (
+            <strong
+              key={index}
+              className="font-black text-[var(--store-primary)]"
+            >
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+
+        return (
+          <span key={index}>
+            {part}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
+
+
 function CheckoutSection({
   title,
   note = "",
@@ -1020,21 +1056,29 @@ function CheckoutSection({
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-6 lg:p-7">
       {title && (
-        <div className="mb-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-slate-100 pb-4">
-          <h2 className="font-serif text-2xl font-semibold tracking-[-0.02em] text-[var(--store-primary)]">
-            {title}
-          </h2>
+        <div className="mb-5 border-b border-slate-100 pb-4">
+          <div className="flex items-baseline gap-2">
+            <h2 className="font-serif text-2xl font-semibold tracking-[-0.02em] text-[var(--store-primary)]">
+              {title}
+            </h2>
 
-          {required && (
-            <em className="font-sans text-sm not-italic text-red-600">
-              *
-            </em>
-          )}
+            {required && (
+              <em className="font-sans text-sm not-italic text-red-600">
+                *
+              </em>
+            )}
+          </div>
 
           {headingNote && (
-            <span className="text-xs font-medium leading-5 text-slate-500 sm:text-sm">
-              {headingNote}
-            </span>
+            <div className="relative mt-3 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-100/80 px-3.5 py-3 shadow-inner backdrop-blur-md sm:px-4">
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/50 via-white/20 to-transparent" />
+
+              <div className="relative">
+                <FormattedNote
+                  text={headingNote}
+                />
+              </div>
+            </div>
           )}
         </div>
       )}

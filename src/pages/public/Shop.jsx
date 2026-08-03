@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   Search,
+  Store,
 } from 'lucide-react';
 
 import {
@@ -23,8 +24,10 @@ export default function Shop() {
     useSearchParams();
 
   const query = params.get('q') || '';
+
   const category =
     params.get('category') || '';
+
   const sort =
     params.get('sort') || 'featured';
 
@@ -190,7 +193,10 @@ export default function Shop() {
       new URLSearchParams(params);
 
     if (value) {
-      next.set(key, value);
+      next.set(
+        key,
+        value,
+      );
     } else {
       next.delete(key);
     }
@@ -232,7 +238,10 @@ export default function Shop() {
               480ms
               cubic-bezier(0.22, 1, 0.36, 1)
               both;
-            will-change: transform, opacity;
+
+            will-change:
+              transform,
+              opacity;
           }
 
           @keyframes productCardTranslate {
@@ -249,12 +258,16 @@ export default function Shop() {
 
           .product-card-translate {
             opacity: 0;
+
             animation:
               productCardTranslate
               450ms
               cubic-bezier(0.22, 1, 0.36, 1)
               forwards;
-            will-change: transform, opacity;
+
+            will-change:
+              transform,
+              opacity;
           }
 
           .mobile-category-scroll {
@@ -280,31 +293,53 @@ export default function Shop() {
       </style>
 
       <div className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 sm:py-14">
-        {/* Mobile-only category strip: four items are visible at a time. */}
+        {/*
+         * Mobile category আগের মতো horizontal থাকবে।
+         * একসঙ্গে চারটি button দেখা যাবে।
+         * Design PublicLayout desktop header-এর মতো।
+         */}
         {topCategories.length > 0 && (
           <section
             aria-label="Product categories"
             className="mb-3 rounded-[24px] border border-slate-200 bg-white p-2 shadow-[0_16px_45px_rgba(15,23,42,0.06)] md:hidden"
           >
-            <div
-              className="mobile-category-scroll flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain"
-            >
+            <div className="mobile-category-scroll flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain">
+              {/* All Products */}
               <button
                 type="button"
                 onClick={() =>
-                  updateParam('category', '')
+                  updateParam(
+                    'category',
+                    '',
+                  )
                 }
                 aria-pressed={!category}
+                title="All Products"
                 className={[
-                  'w-[calc((100%-1.5rem)/4)] shrink-0 snap-start rounded-xl px-1 py-2 text-center text-[10px] font-black transition',
+                  'relative inline-flex min-h-10',
+                  'w-[calc((100%-1.5rem)/4)]',
+                  'shrink-0 snap-start items-center',
+                  'justify-center gap-1 rounded-xl',
+                  'border px-1.5 py-2',
+                  'text-[10px] font-black',
+                  'transition duration-200',
+
                   !category
-                    ? 'bg-[var(--secondary-color)] text-[var(--on-secondary)] shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                    ? 'border-[var(--secondary-color)] bg-[var(--secondary-color)] text-[var(--on-secondary)] shadow-md'
+                    : 'border-[var(--secondary-border)] bg-[var(--secondary-soft)] text-[var(--on-secondary-soft)] hover:border-[var(--secondary-color)] hover:bg-[var(--secondary-color)] hover:text-[var(--on-secondary)]',
                 ].join(' ')}
               >
-                All
+                <Store
+                  size={14}
+                  className="shrink-0 text-current"
+                />
+
+                <span className="min-w-0 truncate text-current">
+                  All Products
+                </span>
               </button>
 
+              {/* Main Categories */}
               {topCategories.map(item => {
                 const isActive =
                   String(category) ===
@@ -317,21 +352,45 @@ export default function Shop() {
                     onClick={() =>
                       updateParam(
                         'category',
-                        isActive ? '' : item.id,
+                        isActive
+                          ? ''
+                          : item.id,
                       )
                     }
                     aria-pressed={isActive}
                     title={item.name}
                     className={[
-                      'w-[calc((100%-1.5rem)/4)] shrink-0 snap-start rounded-xl px-1 py-2 text-center text-[10px] font-black transition',
+                      'relative flex min-h-10',
+                      'w-[calc((100%-1.5rem)/4)]',
+                      'shrink-0 snap-start items-center',
+                      'justify-center rounded-xl',
+                      'px-2 py-2 text-center',
+                      'text-[10px] font-extrabold',
+                      'transition duration-200',
+
                       isActive
-                        ? 'bg-[var(--secondary-color)] text-[var(--on-secondary)] shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                        ? 'bg-[var(--secondary-soft)] text-[var(--on-secondary-soft)]'
+                        : 'text-slate-600 hover:bg-[var(--secondary-soft)] hover:text-[var(--on-secondary-soft)]',
                     ].join(' ')}
                   >
-                    <span className="block truncate">
+                    <span className="block min-w-0 truncate text-current">
                       {item.name}
                     </span>
+
+                    {/* Active underline */}
+                    <span
+                      className={[
+                        'absolute bottom-0',
+                        'left-3 right-3 h-0.5',
+                        'origin-center rounded-full',
+                        'bg-[var(--secondary-color)]',
+                        'transition-transform duration-200',
+
+                        isActive
+                          ? 'scale-x-100'
+                          : 'scale-x-0',
+                      ].join(' ')}
+                    />
                   </button>
                 );
               })}
@@ -395,8 +454,6 @@ export default function Shop() {
         {/*
          * Category/subcategory change হলে key পরিবর্তন হবে।
          * ফলে translate animation আবার চালু হবে।
-         *
-         * এখানে কোনো scroll ব্যবহার করা হয়নি।
          */}
         <div
           key={
